@@ -1,7 +1,51 @@
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { registerPlayer } from '../api'
+import {
+  isValidEmail,
+  isValidName,
+  normalizeEmail,
+  normalizeName,
+  saveEmail,
+  saveName,
+} from '../utils/email'
 
 export default function LandingPage() {
   const navigate = useNavigate()
+  const [name, setName] = useState('')
+  const [email, setEmail] = useState('')
+  const [error, setError] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+
+  async function handleSignUp(e) {
+    e.preventDefault()
+    const normalizedEmail = normalizeEmail(email)
+    const normalizedName = normalizeName(name)
+
+    if (!isValidName(normalizedName)) {
+      setError('Enter your name (2–80 characters).')
+      return
+    }
+
+    if (!isValidEmail(normalizedEmail)) {
+      setError('Enter a valid @getnerdio.com email address.')
+      return
+    }
+
+    setSubmitting(true)
+    setError('')
+
+    try {
+      await registerPlayer(normalizedEmail, normalizedName)
+      saveEmail(normalizedEmail)
+      saveName(normalizedName)
+      navigate('/predict')
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setSubmitting(false)
+    }
+  }
 
   return (
     <div className="landing">
@@ -28,10 +72,39 @@ export default function LandingPage() {
           </ul>
         </section>
 
-        <div className="landing-actions">
-          <button type="button" className="btn btn-primary" onClick={() => navigate('/predict')}>
-            Get started
+        <form className="landing-signup" onSubmit={handleSignUp}>
+          <label htmlFor="landing-name">Your name</label>
+          <input
+            id="landing-name"
+            type="text"
+            value={name}
+            onChange={(e) => {
+              setName(e.target.value)
+              setError('')
+            }}
+            placeholder="Jane Smith"
+            autoComplete="name"
+          />
+
+          <label htmlFor="landing-email">Work email</label>
+          <input
+            id="landing-email"
+            type="email"
+            value={email}
+            onChange={(e) => {
+              setEmail(e.target.value)
+              setError('')
+            }}
+            placeholder="you@getnerdio.com"
+            autoComplete="email"
+          />
+          {error && <p className="form-error">{error}</p>}
+          <button type="submit" className="btn btn-primary" disabled={submitting}>
+            {submitting ? 'Signing up…' : 'Sign up'}
           </button>
+        </form>
+
+        <div className="landing-actions">
           <button
             type="button"
             className="btn btn-secondary"

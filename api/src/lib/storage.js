@@ -47,9 +47,45 @@ async function getPredictionsDocument(email) {
   }
 }
 
+async function createPlayer(email, name) {
+  await initCosmos()
+
+  const existing = await getPredictionsDocument(email)
+  if (existing) {
+    const err = new Error('An account with this email already exists.')
+    err.code = 409
+    throw err
+  }
+
+  const doc = {
+    id: email,
+    email,
+    name,
+    predictions: {},
+    createdAt: new Date().toISOString(),
+  }
+
+  await predictionsContainer.items.create(doc)
+  return doc
+}
+
 async function upsertPredictions(email, predictions) {
   await initCosmos()
-  const doc = { id: email, email, predictions }
+
+  const existing = await getPredictionsDocument(email)
+  if (!existing) {
+    const err = new Error('No account found for this email. Sign up first.')
+    err.code = 404
+    throw err
+  }
+
+  const doc = {
+    ...existing,
+    id: email,
+    email,
+    predictions,
+  }
+
   await predictionsContainer.items.upsert(doc)
   return doc
 }
@@ -88,6 +124,7 @@ function verifyAdminKey(request) {
 
 module.exports = {
   getPredictionsDocument,
+  createPlayer,
   upsertPredictions,
   getAllPredictions,
   getResults,

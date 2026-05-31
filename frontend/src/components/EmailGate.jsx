@@ -1,30 +1,49 @@
 import { useState } from 'react'
-import { isValidEmail, normalizeEmail, saveEmail } from '../utils/email'
+import { getPredictions } from '../api'
+import { isValidEmail, normalizeEmail, saveEmail, saveName } from '../utils/email'
 
 export default function EmailGate({ onComplete, onCancel }) {
   const [email, setEmail] = useState('')
   const [error, setError] = useState('')
+  const [submitting, setSubmitting] = useState(false)
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault()
     const normalized = normalizeEmail(email)
 
     if (!isValidEmail(normalized)) {
-      setError('Enter a valid work email address.')
+      setError('Enter a valid @getnerdio.com email address.')
       return
     }
 
-    saveEmail(normalized)
-    onComplete(normalized)
+    setSubmitting(true)
+    setError('')
+
+    try {
+      const data = await getPredictions(normalized)
+
+      if (!data.registered) {
+        setError('No account found for this email. Sign up on the home page.')
+        return
+      }
+
+      saveEmail(normalized)
+      if (data.name) saveName(data.name)
+      onComplete(normalized)
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   return (
     <div className="email-gate-page">
       <div className="gate-card card">
-        <p className="eyebrow">Get started</p>
+        <p className="eyebrow">Sign in</p>
         <h1>Enter your work email</h1>
         <p className="gate-copy">
-          Your email is your player identity for predictions and the leaderboard.
+          Use the @getnerdio.com email you signed up with to enter your predictions.
         </p>
         <form onSubmit={handleSubmit}>
           <label htmlFor="email">Work email</label>
@@ -36,7 +55,7 @@ export default function EmailGate({ onComplete, onCancel }) {
               setEmail(e.target.value)
               setError('')
             }}
-            placeholder="you@company.com"
+            placeholder="you@getnerdio.com"
             autoComplete="email"
             autoFocus
           />
@@ -47,8 +66,8 @@ export default function EmailGate({ onComplete, onCancel }) {
                 Back
               </button>
             )}
-            <button type="submit" className="btn btn-primary">
-              Continue
+            <button type="submit" className="btn btn-primary" disabled={submitting}>
+              {submitting ? 'Checking…' : 'Continue'}
             </button>
           </div>
         </form>

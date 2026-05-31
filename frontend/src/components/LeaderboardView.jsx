@@ -1,7 +1,6 @@
 import { Fragment, useEffect, useState } from 'react'
 import { FIXTURES, TOTAL_FIXTURES } from '../fixtures'
 import { getLeaderboard, getPredictions } from '../api'
-import { getLocalPart } from '../utils/email'
 import { TeamWithFlag } from '../utils/flags.jsx'
 import { isPredictionComplete, scorePrediction } from '../utils/scoring'
 
@@ -21,13 +20,13 @@ function formatScore(home, away) {
   return `${home} – ${away}`
 }
 
-function PlayerPredictionsPanel({ playerEmail, predictions, results, loading, error }) {
+function PlayerPredictionsPanel({ playerName, predictions, results, loading, error }) {
   if (loading) {
     return (
       <div className="leaderboard-panel">
         <div className="leaderboard-panel-header">
           <span className="eyebrow">Predictions</span>
-          <h3>{getLocalPart(playerEmail)}</h3>
+          <h3>{playerName}</h3>
         </div>
         <p className="leaderboard-panel-loading">Loading predictions…</p>
       </div>
@@ -39,7 +38,7 @@ function PlayerPredictionsPanel({ playerEmail, predictions, results, loading, er
       <div className="leaderboard-panel">
         <div className="leaderboard-panel-header">
           <span className="eyebrow">Predictions</span>
-          <h3>{getLocalPart(playerEmail)}</h3>
+          <h3>{playerName}</h3>
         </div>
         <p className="banner banner-error">{error}</p>
       </div>
@@ -50,7 +49,7 @@ function PlayerPredictionsPanel({ playerEmail, predictions, results, loading, er
     <div className="leaderboard-panel">
       <div className="leaderboard-panel-header">
         <span className="eyebrow">Group stage predictions</span>
-        <h3>{getLocalPart(playerEmail)}</h3>
+        <h3>{playerName}</h3>
       </div>
       <div className="leaderboard-predictions-wrap">
         <table className="leaderboard-predictions-table">
@@ -210,7 +209,7 @@ export default function LeaderboardView({ email }) {
                       <td>{index + 1}</td>
                       <td>
                         <span className="player-name-cell">
-                          {getLocalPart(row.email)}
+                          {row.name}
                           <span className="expand-icon" aria-hidden="true">
                             {isExpanded ? '▾' : '▸'}
                           </span>
@@ -228,7 +227,7 @@ export default function LeaderboardView({ email }) {
                       <tr className="leaderboard-panel-row">
                         <td colSpan={7}>
                           <PlayerPredictionsPanel
-                            playerEmail={row.email}
+                            playerName={row.name}
                             predictions={panelData?.predictions}
                             results={panelData?.results}
                             loading={panelLoading}

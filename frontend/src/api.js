@@ -33,6 +33,22 @@ export async function getLeaderboard() {
   return parseResponse(response)
 }
 
+export async function registerPlayer(email, name) {
+  const response = await fetch(apiUrl('/api/register'), {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, name }),
+  })
+  return parseResponse(response)
+}
+
+export async function verifyAdmin(adminKey) {
+  const response = await fetch(apiUrl('/api/admin/verify'), {
+    headers: { 'x-admin-key': adminKey },
+  })
+  return parseResponse(response)
+}
+
 export async function getResults() {
   const response = await fetch(apiUrl('/api/results'))
   return parseResponse(response)

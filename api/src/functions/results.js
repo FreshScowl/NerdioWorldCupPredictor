@@ -1,5 +1,6 @@
 const { app } = require('@azure/functions')
 const { getResults, upsertResults, verifyAdminKey } = require('../lib/storage')
+const { normalizeResults } = require('../lib/validation')
 
 app.http('results', {
   methods: ['GET', 'POST'],
@@ -17,8 +18,9 @@ app.http('results', {
       }
 
       const body = await request.json()
-      await upsertResults(body.results || {})
-      return { jsonBody: { success: true } }
+      const results = normalizeResults(body.results || {})
+      await upsertResults(results)
+      return { jsonBody: { success: true, results } }
     } catch (err) {
       return { status: 500, jsonBody: { error: err.message } }
     }

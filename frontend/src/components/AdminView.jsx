@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { fixturesByGroup, GROUPS } from '../fixtures'
-import { getResults, saveResults } from '../api'
+import { getResults, saveResults, verifyAdmin } from '../api'
+
+const ADMIN_KEY_STORAGE = 'nerdio-wcp-admin-key'
 
 function ScoreInput({ value, onChange, label }) {
   return (
@@ -39,10 +41,28 @@ export default function AdminView() {
   const grouped = fixturesByGroup()
 
   useEffect(() => {
+    async function tryRestoreSession() {
+      const storedKey = sessionStorage.getItem(ADMIN_KEY_STORAGE)
+      if (!storedKey) return
+
+      try {
+        await verifyAdmin(storedKey)
+        setAdminKey(storedKey)
+        setUnlocked(true)
+      } catch {
+        sessionStorage.removeItem(ADMIN_KEY_STORAGE)
+      }
+    }
+
+    tryRestoreSession()
+  }, [])
+
+  useEffect(() => {
     if (!unlocked) return
 
     async function load() {
       setLoading(true)
+      setError('')
       try {
         const data = await getResults()
         setResults(data.results || {})
@@ -52,6 +72,7 @@ export default function AdminView() {
         setLoading(false)
       }
     }
+
     load()
   }, [unlocked])
 
@@ -59,11 +80,10 @@ export default function AdminView() {
     e.preventDefault()
     setAuthLoading(true)
     setAuthError('')
+
     try {
-      const data = await getResults()
-      const currentResults = data.results || {}
-      await saveResults(adminKey, currentResults)
-      setResults(currentResults)
+      await verifyAdmin(adminKey)
+      sessionStorage.setItem(ADMIN_KEY_STORAGE, adminKey)
       setUnlocked(true)
     } catch (err) {
       setAuthError(err.message || 'Invalid admin key.')
@@ -87,8 +107,12 @@ export default function AdminView() {
     setSaving(true)
     setError('')
     setMessage('')
+
     try {
-      await saveResults(adminKey, results)
+      const data = await saveResults(adminKey, results)
+      if (data.results) {
+        setResults(data.results)
+      }
       setMessage('Results saved.')
     } catch (err) {
       setError(err.message)
@@ -132,6 +156,11 @@ export default function AdminView() {
       <div className="admin-view">
         {error && <p className="banner banner-error">{error}</p>}
         {message && <p className="banner banner-success">{message}</p>}
+
+        <p className="admin-hint">
+          Enter the final score for each match, then click Save results. Leave a field blank to
+          clear a result.
+        </p>
 
         {GROUPS.map((group) => (
           <section key={group} className="group-section card">
