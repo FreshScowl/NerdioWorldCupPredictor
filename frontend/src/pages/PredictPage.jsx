@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getPredictions } from '../api'
-import { clearEmail, loadEmail, saveName } from '../utils/email'
+import { clearEmail, loadEmail, saveName, saveSupportedTeam } from '../utils/email'
 import EmailGate from '../components/EmailGate'
 import PredictView from '../components/PredictView'
 
@@ -28,6 +28,7 @@ export default function PredictPage() {
           setEmail(null)
         } else {
           if (data.name) saveName(data.name)
+          if (data.supportedTeam) saveSupportedTeam(data.supportedTeam)
           setEmail(stored)
         }
       } catch {

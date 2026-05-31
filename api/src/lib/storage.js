@@ -47,7 +47,7 @@ async function getPredictionsDocument(email) {
   }
 }
 
-async function createPlayer(email, name) {
+async function createPlayer(email, name, supportedTeam = null) {
   await initCosmos()
 
   const existing = await getPredictionsDocument(email)
@@ -61,6 +61,7 @@ async function createPlayer(email, name) {
     id: email,
     email,
     name,
+    supportedTeam,
     predictions: {},
     createdAt: new Date().toISOString(),
   }

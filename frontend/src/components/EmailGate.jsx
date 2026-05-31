@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { getPredictions } from '../api'
-import { isValidEmail, normalizeEmail, saveEmail, saveName } from '../utils/email'
+import { isValidEmail, normalizeEmail, saveEmail, saveName, saveSupportedTeam } from '../utils/email'
 
 export default function EmailGate({ onComplete, onCancel }) {
   const [email, setEmail] = useState('')
@@ -34,6 +34,7 @@ export default function EmailGate({ onComplete, onCancel }) {
 
       saveEmail(normalized)
       if (data.name) saveName(data.name)
+      if (data.supportedTeam) saveSupportedTeam(data.supportedTeam)
       onComplete(normalized)
     } catch (err) {
       setError(err.message)

@@ -126,6 +126,35 @@
   margin-top: 0.25rem;
 }
 
+.flag-picker {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.flag-picker select {
+  flex: 1;
+  margin-bottom: 0;
+}
+
+.flag-picker-preview {
+  font-size: 1.75rem;
+  line-height: 1;
+}
+
+.player-with-flag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.player-flag,
+.team-flag {
+  font-size: 1.1em;
+  line-height: 1;
+}
+
 .landing-actions {
   display: flex;
   flex-wrap: wrap;
@@ -325,13 +354,15 @@ label {
 
 input[type='email'],
 input[type='password'],
-input[type='text'] {
+input[type='text'],
+select {
   width: 100%;
   padding: 0.65rem 0.85rem;
   border: 1px solid #d0d8de;
   border-radius: 8px;
   font-size: 15px;
   margin-bottom: 1rem;
+  background: #fff;
 }
 
 input:focus {

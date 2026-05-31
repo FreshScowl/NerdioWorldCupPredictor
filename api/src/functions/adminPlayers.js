@@ -15,6 +15,7 @@ function summarizePlayer(doc) {
   return {
     email: doc.email,
     name: doc.name || doc.email.split('@')[0],
+    supportedTeam: doc.supportedTeam || null,
     retired: !!doc.retired,
     retiredAt: doc.retiredAt || null,
     createdAt: doc.createdAt || null,

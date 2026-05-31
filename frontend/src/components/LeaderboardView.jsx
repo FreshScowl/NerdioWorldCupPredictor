@@ -1,6 +1,7 @@
 import { Fragment, useEffect, useState } from 'react'
 import { FIXTURES, TOTAL_FIXTURES } from '../fixtures'
 import { getLeaderboard, getPredictions } from '../api'
+import { PlayerWithFlag } from '../utils/flags.jsx'
 import { TeamWithFlag } from '../utils/flags.jsx'
 import { isPredictionComplete, scorePrediction } from '../utils/scoring'
 
@@ -20,13 +21,15 @@ function formatScore(home, away) {
   return `${home} – ${away}`
 }
 
-function PlayerPredictionsPanel({ playerName, predictions, results, loading, error }) {
+function PlayerPredictionsPanel({ playerName, supportedTeam, predictions, results, loading, error }) {
+  const title = <PlayerWithFlag name={playerName} supportedTeam={supportedTeam} />
+
   if (loading) {
     return (
       <div className="leaderboard-panel">
         <div className="leaderboard-panel-header">
           <span className="eyebrow">Predictions</span>
-          <h3>{playerName}</h3>
+          <h3>{title}</h3>
         </div>
         <p className="leaderboard-panel-loading">Loading predictions…</p>
       </div>
@@ -38,7 +41,7 @@ function PlayerPredictionsPanel({ playerName, predictions, results, loading, err
       <div className="leaderboard-panel">
         <div className="leaderboard-panel-header">
           <span className="eyebrow">Predictions</span>
-          <h3>{playerName}</h3>
+          <h3>{title}</h3>
         </div>
         <p className="banner banner-error">{error}</p>
       </div>
@@ -49,7 +52,7 @@ function PlayerPredictionsPanel({ playerName, predictions, results, loading, err
     <div className="leaderboard-panel">
       <div className="leaderboard-panel-header">
         <span className="eyebrow">Group stage predictions</span>
-        <h3>{playerName}</h3>
+        <h3>{title}</h3>
       </div>
       <div className="leaderboard-predictions-wrap">
         <table className="leaderboard-predictions-table">
@@ -209,7 +212,7 @@ export default function LeaderboardView({ email }) {
                       <td>{index + 1}</td>
                       <td>
                         <span className="player-name-cell">
-                          {row.name}
+                          <PlayerWithFlag name={row.name} supportedTeam={row.supportedTeam} />
                           <span className="expand-icon" aria-hidden="true">
                             {isExpanded ? '▾' : '▸'}
                           </span>
@@ -228,6 +231,7 @@ export default function LeaderboardView({ email }) {
                         <td colSpan={7}>
                           <PlayerPredictionsPanel
                             playerName={row.name}
+                            supportedTeam={row.supportedTeam}
                             predictions={panelData?.predictions}
                             results={panelData?.results}
                             loading={panelLoading}

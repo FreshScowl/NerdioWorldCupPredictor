@@ -23,7 +23,7 @@ const TEAM_FLAGS = {
   Peru: 'PE',
   Germany: 'DE',
   'Saudi Arabia': 'SA',
-  England: 'GB',
+  England: 'EN',
   Venezuela: 'VE',
   Portugal: 'PT',
   Egypt: 'EG',
@@ -33,15 +33,27 @@ const TEAM_FLAGS = {
   Senegal: 'SN',
 }
 
-function flagFromCode(code) {
-  return [...code.toUpperCase()]
+const PLAYER_FLAG_OVERRIDES = {
+  EN: 'GB',
+  WA: 'GB',
+}
+
+export function countryFlag(code) {
+  if (!code) return ''
+  const normalized = String(code).toUpperCase()
+  const flagCode = PLAYER_FLAG_OVERRIDES[normalized] || normalized
+  return [...flagCode]
     .map((char) => String.fromCodePoint(127397 + char.charCodeAt(0)))
     .join('')
 }
 
+function teamFlagCode(teamName) {
+  return TEAM_FLAGS[teamName]
+}
+
 export function teamFlag(teamName) {
-  const code = TEAM_FLAGS[teamName]
-  return code ? flagFromCode(code) : '🏳️'
+  const code = teamFlagCode(teamName)
+  return code ? countryFlag(code) : '🏳️'
 }
 
 export function TeamWithFlag({ team }) {
@@ -51,6 +63,19 @@ export function TeamWithFlag({ team }) {
         {teamFlag(team)}
       </span>
       {team}
+    </span>
+  )
+}
+
+export function PlayerWithFlag({ name, supportedTeam }) {
+  if (!supportedTeam) return name
+
+  return (
+    <span className="player-with-flag">
+      <span className="player-flag" aria-hidden="true">
+        {teamFlag(supportedTeam)}
+      </span>
+      {name}
     </span>
   )
 }

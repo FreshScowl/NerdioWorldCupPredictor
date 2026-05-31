@@ -33,11 +33,11 @@ export async function getLeaderboard() {
   return parseResponse(response)
 }
 
-export async function registerPlayer(email, name) {
+export async function registerPlayer(email, name, supportedTeam = null) {
   const response = await fetch(apiUrl('/api/register'), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, name }),
+    body: JSON.stringify({ email, name, supportedTeam }),
   })
   return parseResponse(response)
 }

@@ -16,7 +16,13 @@ app.http('leaderboard', {
       const players = allPredictions
         .filter((doc) => !doc.retired)
         .map((doc) =>
-          calculatePlayerStats(doc.email, doc.predictions, results, doc.name)
+          calculatePlayerStats(
+            doc.email,
+            doc.predictions,
+            results,
+            doc.name,
+            doc.supportedTeam
+          )
         )
 
       players.sort((a, b) => {

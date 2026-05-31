@@ -1,5 +1,6 @@
 const EMAIL_KEY = 'nerdio-wcp-email'
 const NAME_KEY = 'nerdio-wcp-name'
+const SUPPORTED_TEAM_KEY = 'nerdio-wcp-supported-team'
 const ALLOWED_DOMAIN = 'getnerdio.com'
 
 export function normalizeEmail(email) {
@@ -46,7 +47,22 @@ export function saveName(name) {
   return normalized
 }
 
+export function loadSupportedTeam() {
+  return localStorage.getItem(SUPPORTED_TEAM_KEY) || null
+}
+
+export function saveSupportedTeam(supportedTeam) {
+  if (!supportedTeam) {
+    localStorage.removeItem(SUPPORTED_TEAM_KEY)
+    return null
+  }
+
+  localStorage.setItem(SUPPORTED_TEAM_KEY, supportedTeam)
+  return supportedTeam
+}
+
 export function clearEmail() {
   localStorage.removeItem(EMAIL_KEY)
   localStorage.removeItem(NAME_KEY)
+  localStorage.removeItem(SUPPORTED_TEAM_KEY)
 }

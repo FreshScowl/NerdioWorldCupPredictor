@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { registerPlayer } from '../api'
+import { formatTeamOption, WORLD_CUP_TEAMS } from '../utils/teams'
+import { teamFlag } from '../utils/flags'
 import {
   isValidEmail,
   isValidName,
@@ -8,12 +10,14 @@ import {
   normalizeName,
   saveEmail,
   saveName,
+  saveSupportedTeam,
 } from '../utils/email'
 
 export default function LandingPage() {
   const navigate = useNavigate()
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
+  const [supportedTeam, setSupportedTeam] = useState('')
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
 
@@ -21,6 +25,7 @@ export default function LandingPage() {
     e.preventDefault()
     const normalizedEmail = normalizeEmail(email)
     const normalizedName = normalizeName(name)
+    const selectedTeam = supportedTeam || null
 
     if (!isValidName(normalizedName)) {
       setError('Enter your name (2–80 characters).')
@@ -36,9 +41,10 @@ export default function LandingPage() {
     setError('')
 
     try {
-      await registerPlayer(normalizedEmail, normalizedName)
+      await registerPlayer(normalizedEmail, normalizedName, selectedTeam)
       saveEmail(normalizedEmail)
       saveName(normalizedName)
+      saveSupportedTeam(selectedTeam)
       navigate('/predict')
     } catch (err) {
       setError(err.message)
@@ -85,6 +91,30 @@ export default function LandingPage() {
             placeholder="Jane Smith"
             autoComplete="name"
           />
+
+          <label htmlFor="landing-team">What team do you support? (optional)</label>
+          <div className="flag-picker">
+            <select
+              id="landing-team"
+              value={supportedTeam}
+              onChange={(e) => {
+                setSupportedTeam(e.target.value)
+                setError('')
+              }}
+            >
+              <option value="">No team selected</option>
+              {WORLD_CUP_TEAMS.map((team) => (
+                <option key={team} value={team}>
+                  {formatTeamOption(team)}
+                </option>
+              ))}
+            </select>
+            {supportedTeam && (
+              <span className="flag-picker-preview" aria-hidden="true">
+                {teamFlag(supportedTeam)}
+              </span>
+            )}
+          </div>
 
           <label htmlFor="landing-email">Work email</label>
           <input
