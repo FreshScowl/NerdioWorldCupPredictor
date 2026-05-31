@@ -12,7 +12,7 @@ param cosmosConnectionString string
 @secure()
 param adminKey string
 
-// Static Web Apps Free tier is only available in eastus2
+// Static Web Apps Standard tier (eastus2)
 var staticWebAppLocation = 'eastus2'
 
 resource staticWebApp 'Microsoft.Web/staticSites@2022-03-01' = {
@@ -20,8 +20,8 @@ resource staticWebApp 'Microsoft.Web/staticSites@2022-03-01' = {
   location: staticWebAppLocation
   tags: tags
   sku: {
-    name: 'Free'
-    tier: 'Free'
+    name: 'Standard'
+    tier: 'Standard'
   }
   properties: {}
 }
