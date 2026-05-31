@@ -1,6 +1,3 @@
-@description('Static Web App name')
-param name string
-
 @description('Resource tags')
 param tags object = {}
 
@@ -19,7 +16,7 @@ param adminKey string
 var staticWebAppLocation = 'eastus2'
 
 resource staticWebApp 'Microsoft.Web/staticSites@2022-03-01' = {
-  name: name
+  name: 'nerdio-worldcup-predictor'
   location: staticWebAppLocation
   tags: tags
   sku: {

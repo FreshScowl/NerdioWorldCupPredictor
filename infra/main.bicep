@@ -39,7 +39,6 @@ module keyVault 'modules/keyvault.bicep' = {
 module staticWebApp 'modules/staticwebapp.bicep' = {
   name: 'staticWebAppDeploy'
   params: {
-    name: appName
     tags: tags
     cosmosDbName: cosmos.outputs.databaseName
     cosmosConnectionString: cosmos.outputs.connectionString
