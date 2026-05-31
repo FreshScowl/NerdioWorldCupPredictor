@@ -6,7 +6,7 @@ React frontend deployed to Azure Static Web Apps with an Azure Functions backend
 
 ```
 /
-├── frontend/   # Vite + React app
+├── nwcp/       # Vite + React app
 ├── api/        # Azure Functions v4 (Node.js)
 └── README.md
 ```
@@ -22,7 +22,7 @@ React frontend deployed to Azure Static Web Apps with an Azure Functions backend
 ### Frontend
 
 ```bash
-cd frontend
+cd nwcp
 npm install
 npm run dev
 ```
@@ -51,4 +51,4 @@ Configure these application settings on the Static Web App for the API:
 
 Deploy via GitHub Actions on push to `main`. After creating the Static Web App in Azure, add the deployment token as the GitHub secret `AZURE_STATIC_WEB_APPS_API_TOKEN`.
 
-The workflow builds the Vite app from `/frontend` and deploys the Azure Functions API from `/api`. SPA routing and `/api/*` proxying are configured in `frontend/public/staticwebapp.config.json`.
+The workflow builds the Vite app from `/nwcp` and deploys the Azure Functions API from `/api`. SPA routing and `/api/*` proxying are configured in `nwcp/public/staticwebapp.config.json`.

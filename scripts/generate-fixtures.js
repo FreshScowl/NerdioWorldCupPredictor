@@ -169,6 +169,6 @@ ${fixtureLines.join('\n')}
 module.exports = { FIXTURES, TOTAL_FIXTURES: FIXTURES.length }
 `
 
-fs.writeFileSync(path.join(__dirname, '..', 'frontend', 'src', 'fixtures.js'), frontendBody)
+fs.writeFileSync(path.join(__dirname, '..', 'nwcp', 'src', 'fixtures.js'), frontendBody)
 fs.writeFileSync(path.join(__dirname, '..', 'api', 'fixtures.js'), apiBody)
 console.log(`Wrote ${fixtures.length} fixtures`)
