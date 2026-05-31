@@ -16,13 +16,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # AZURE_CREDENTIALS is a JSON object from:
-      #   az ad sp create-for-rbac \
-      #     --name "github-actions-nerdio-worldcup" \
-      #     --role contributor \
-      #     --scopes /subscriptions/<SUBSCRIPTION_ID>/resourceGroups/<AZURE_RG_NAME> \
-      #     --sdk-auth
-      # Add the full JSON output as a GitHub repository secret named AZURE_CREDENTIALS.
       - name: Log in to Azure
         uses: azure/login@v2
         with:
@@ -61,7 +54,6 @@ jobs:
   deploy_app:
     runs-on: ubuntu-latest
     name: Build and Deploy App Service
-    needs: deploy_api
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -71,11 +63,20 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Install and build frontend
+      - name: Install, build, and prepare deployment package
         working-directory: nwcp
         run: |
           npm ci
           npm run build
+          npm prune --production
+          test -f server.js
+          test -f package.json
+          test -d dist
+          test -d node_modules/express
+          test -d node_modules/http-proxy-middleware
+          echo "Deployment package contents:"
+          ls -la
+          ls -la dist | head -20
 
       - name: Deploy to App Service
         uses: azure/webapps-deploy@v3

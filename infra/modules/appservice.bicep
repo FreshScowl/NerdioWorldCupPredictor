@@ -36,7 +36,7 @@ resource appService 'Microsoft.Web/sites@2022-09-01' = {
     httpsOnly: true
     siteConfig: {
       linuxFxVersion: 'NODE|22-lts'
-      appCommandLine: 'npm start'
+      appCommandLine: 'node server.js'
       alwaysOn: true
       appSettings: [
         {
@@ -62,6 +62,10 @@ resource appService 'Microsoft.Web/sites@2022-09-01' = {
         {
           name: 'SCM_DO_BUILD_DURING_DEPLOYMENT'
           value: 'false'
+        }
+        {
+          name: 'WEBSITE_RUN_FROM_PACKAGE'
+          value: '1'
         }
       ]
     }
