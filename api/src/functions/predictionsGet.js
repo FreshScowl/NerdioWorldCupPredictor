@@ -1,5 +1,5 @@
 const { app } = require('@azure/functions')
-const { getPredictionsDocument } = require('../lib/storage')
+const { getPredictionsDocument, getResults } = require('../lib/storage')
 
 app.http('predictionsGet', {
   methods: ['GET'],
@@ -15,7 +15,10 @@ app.http('predictionsGet', {
         return { status: 400, jsonBody: { error: 'Email is required' } }
       }
 
-      const doc = await getPredictionsDocument(email)
+      const [doc, results] = await Promise.all([
+        getPredictionsDocument(email),
+        getResults(),
+      ])
 
       if (!doc) {
         return {
@@ -23,11 +26,12 @@ app.http('predictionsGet', {
             id: email,
             email,
             predictions: {},
+            results,
           },
         }
       }
 
-      return { jsonBody: doc }
+      return { jsonBody: { ...doc, results } }
     } catch (err) {
       return { status: 500, jsonBody: { error: err.message } }
     }
