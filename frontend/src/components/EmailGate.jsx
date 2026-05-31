@@ -27,6 +27,11 @@ export default function EmailGate({ onComplete, onCancel }) {
         return
       }
 
+      if (data.retired) {
+        setError('This account has been retired.')
+        return
+      }
+
       saveEmail(normalized)
       if (data.name) saveName(data.name)
       onComplete(normalized)

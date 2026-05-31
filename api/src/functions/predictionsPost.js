@@ -28,6 +28,9 @@ app.http('predictionsPost', {
       if (err.code === 404) {
         return { status: 404, jsonBody: { error: err.message } }
       }
+      if (err.code === 403) {
+        return { status: 403, jsonBody: { error: err.message } }
+      }
       return { status: 500, jsonBody: { error: err.message } }
     }
   },

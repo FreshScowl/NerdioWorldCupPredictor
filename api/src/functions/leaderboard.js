@@ -13,9 +13,11 @@ app.http('leaderboard', {
         getResults(),
       ])
 
-      const players = allPredictions.map((doc) =>
-        calculatePlayerStats(doc.email, doc.predictions, results, doc.name)
-      )
+      const players = allPredictions
+        .filter((doc) => !doc.retired)
+        .map((doc) =>
+          calculatePlayerStats(doc.email, doc.predictions, results, doc.name)
+        )
 
       players.sort((a, b) => {
         if (b.totalPoints !== a.totalPoints) return b.totalPoints - a.totalPoints

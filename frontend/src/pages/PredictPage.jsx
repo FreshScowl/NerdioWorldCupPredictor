@@ -23,6 +23,9 @@ export default function PredictPage() {
         if (!data.registered) {
           clearEmail()
           setEmail(null)
+        } else if (data.retired) {
+          clearEmail()
+          setEmail(null)
         } else {
           if (data.name) saveName(data.name)
           setEmail(stored)

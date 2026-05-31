@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { fixturesByGroup, GROUPS } from '../fixtures'
 import { getResults, saveResults, verifyAdmin } from '../api'
+import AdminAccounts from './AdminAccounts'
 
 const ADMIN_KEY_STORAGE = 'nerdio-wcp-admin-key'
 
@@ -26,19 +27,100 @@ function ScoreInput({ value, onChange, label }) {
   )
 }
 
+function AdminResults({ adminKey, results, setResults, error, setError, message, setMessage }) {
+  const [saving, setSaving] = useState(false)
+  const grouped = fixturesByGroup()
+
+  function updateResult(fixtureId, side, value) {
+    setResults((prev) => ({
+      ...prev,
+      [fixtureId]: {
+        ...prev[fixtureId],
+        [side]: value,
+      },
+    }))
+    setMessage('')
+  }
+
+  async function handleSave() {
+    setSaving(true)
+    setError('')
+    setMessage('')
+
+    try {
+      const data = await saveResults(adminKey, results)
+      if (data.results) {
+        setResults(data.results)
+      }
+      setMessage('Results saved.')
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  return (
+    <div className="admin-view">
+      {error && <p className="banner banner-error">{error}</p>}
+      {message && <p className="banner banner-success">{message}</p>}
+
+      <p className="admin-hint">
+        Enter the final score for each match, then click Save results. Leave a field blank to clear
+        a result.
+      </p>
+
+      {GROUPS.map((group) => (
+        <section key={group} className="group-section card">
+          <h2>Group {group} — Results</h2>
+          <ul className="fixture-list">
+            {grouped[group].map((fixture) => {
+              const result = results[fixture.id] || {}
+              return (
+                <li key={fixture.id} className="fixture-row">
+                  <span className="fixture-teams">
+                    {fixture.home} vs {fixture.away}
+                  </span>
+                  <div className="fixture-inputs">
+                    <ScoreInput
+                      value={result.home}
+                      onChange={(v) => updateResult(fixture.id, 'home', v)}
+                      label={`${fixture.home} score`}
+                    />
+                    <span className="fixture-separator">–</span>
+                    <ScoreInput
+                      value={result.away}
+                      onChange={(v) => updateResult(fixture.id, 'away', v)}
+                      label={`${fixture.away} score`}
+                    />
+                  </div>
+                </li>
+              )
+            })}
+          </ul>
+        </section>
+      ))}
+
+      <div className="sticky-save">
+        <button type="button" className="btn btn-primary" onClick={handleSave} disabled={saving}>
+          {saving ? 'Saving…' : 'Save results'}
+        </button>
+      </div>
+    </div>
+  )
+}
+
 export default function AdminView() {
   const [unlocked, setUnlocked] = useState(false)
   const [adminKey, setAdminKey] = useState('')
   const [authError, setAuthError] = useState('')
   const [authLoading, setAuthLoading] = useState(false)
+  const [activeTab, setActiveTab] = useState('results')
 
   const [results, setResults] = useState({})
   const [loading, setLoading] = useState(false)
-  const [saving, setSaving] = useState(false)
-  const [message, setMessage] = useState('')
   const [error, setError] = useState('')
-
-  const grouped = fixturesByGroup()
+  const [message, setMessage] = useState('')
 
   useEffect(() => {
     async function tryRestoreSession() {
@@ -92,35 +174,6 @@ export default function AdminView() {
     }
   }
 
-  function updateResult(fixtureId, side, value) {
-    setResults((prev) => ({
-      ...prev,
-      [fixtureId]: {
-        ...prev[fixtureId],
-        [side]: value,
-      },
-    }))
-    setMessage('')
-  }
-
-  async function handleSave() {
-    setSaving(true)
-    setError('')
-    setMessage('')
-
-    try {
-      const data = await saveResults(adminKey, results)
-      if (data.results) {
-        setResults(data.results)
-      }
-      setMessage('Results saved.')
-    } catch (err) {
-      setError(err.message)
-    } finally {
-      setSaving(false)
-    }
-  }
-
   let content
 
   if (!unlocked) {
@@ -150,60 +203,41 @@ export default function AdminView() {
       </div>
     )
   } else if (loading) {
-    content = <div className="view-loading">Loading results…</div>
+    content = <div className="view-loading">Loading admin…</div>
   } else {
     content = (
-      <div className="admin-view">
-        {error && <p className="banner banner-error">{error}</p>}
-        {message && <p className="banner banner-success">{message}</p>}
-
-        <p className="admin-hint">
-          Enter the final score for each match, then click Save results. Leave a field blank to
-          clear a result.
-        </p>
-
-        {GROUPS.map((group) => (
-          <section key={group} className="group-section card">
-            <h2>Group {group} — Results</h2>
-            <ul className="fixture-list">
-              {grouped[group].map((fixture) => {
-                const result = results[fixture.id] || {}
-                return (
-                  <li key={fixture.id} className="fixture-row">
-                    <span className="fixture-teams">
-                      {fixture.home} vs {fixture.away}
-                    </span>
-                    <div className="fixture-inputs">
-                      <ScoreInput
-                        value={result.home}
-                        onChange={(v) => updateResult(fixture.id, 'home', v)}
-                        label={`${fixture.home} score`}
-                      />
-                      <span className="fixture-separator">–</span>
-                      <ScoreInput
-                        value={result.away}
-                        onChange={(v) => updateResult(fixture.id, 'away', v)}
-                        label={`${fixture.away} score`}
-                      />
-                    </div>
-                  </li>
-                )
-              })}
-            </ul>
-          </section>
-        ))}
-
-        <div className="sticky-save">
+      <>
+        <nav className="admin-tabs" aria-label="Admin sections">
           <button
             type="button"
-            className="btn btn-primary"
-            onClick={handleSave}
-            disabled={saving}
+            className={`admin-tab ${activeTab === 'results' ? 'active' : ''}`}
+            onClick={() => setActiveTab('results')}
           >
-            {saving ? 'Saving…' : 'Save results'}
+            Match results
           </button>
-        </div>
-      </div>
+          <button
+            type="button"
+            className={`admin-tab ${activeTab === 'accounts' ? 'active' : ''}`}
+            onClick={() => setActiveTab('accounts')}
+          >
+            Accounts
+          </button>
+        </nav>
+
+        {activeTab === 'results' ? (
+          <AdminResults
+            adminKey={adminKey}
+            results={results}
+            setResults={setResults}
+            error={error}
+            setError={setError}
+            message={message}
+            setMessage={setMessage}
+          />
+        ) : (
+          <AdminAccounts adminKey={adminKey} />
+        )}
+      </>
     )
   }
 

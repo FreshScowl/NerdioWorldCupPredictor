@@ -79,6 +79,12 @@ async function upsertPredictions(email, predictions) {
     throw err
   }
 
+  if (existing.retired) {
+    const err = new Error('This account has been retired.')
+    err.code = 403
+    throw err
+  }
+
   const doc = {
     ...existing,
     id: email,
@@ -88,6 +94,48 @@ async function upsertPredictions(email, predictions) {
 
   await predictionsContainer.items.upsert(doc)
   return doc
+}
+
+async function retirePlayer(email) {
+  await initCosmos()
+
+  const existing = await getPredictionsDocument(email)
+  if (!existing) {
+    const err = new Error('Account not found.')
+    err.code = 404
+    throw err
+  }
+
+  if (existing.retired) {
+    const err = new Error('Account is already retired.')
+    err.code = 400
+    throw err
+  }
+
+  const doc = {
+    ...existing,
+    retired: true,
+    retiredAt: new Date().toISOString(),
+  }
+
+  await predictionsContainer.items.upsert(doc)
+  return doc
+}
+
+async function deletePlayer(email) {
+  await initCosmos()
+
+  try {
+    await predictionsContainer.item(email, email).delete()
+    return { email, deleted: true }
+  } catch (err) {
+    if (err.code === 404) {
+      const notFound = new Error('Account not found.')
+      notFound.code = 404
+      throw notFound
+    }
+    throw err
+  }
 }
 
 async function getAllPredictions() {
@@ -126,6 +174,8 @@ module.exports = {
   getPredictionsDocument,
   createPlayer,
   upsertPredictions,
+  retirePlayer,
+  deletePlayer,
   getAllPredictions,
   getResults,
   upsertResults,

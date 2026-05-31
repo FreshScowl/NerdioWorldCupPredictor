@@ -65,3 +65,36 @@ export async function saveResults(adminKey, results) {
   })
   return parseResponse(response)
 }
+
+function adminHeaders(adminKey) {
+  return { 'x-admin-key': adminKey }
+}
+
+export async function getAdminPlayers(adminKey) {
+  const response = await fetch(apiUrl('/api/admin/players'), {
+    headers: adminHeaders(adminKey),
+  })
+  return parseResponse(response)
+}
+
+export async function retireAdminPlayer(adminKey, email) {
+  const response = await fetch(
+    apiUrl(`/api/admin/players/${encodeURIComponent(email)}/retire`),
+    {
+      method: 'POST',
+      headers: adminHeaders(adminKey),
+    }
+  )
+  return parseResponse(response)
+}
+
+export async function deleteAdminPlayer(adminKey, email) {
+  const response = await fetch(
+    apiUrl(`/api/admin/players/${encodeURIComponent(email)}`),
+    {
+      method: 'DELETE',
+      headers: adminHeaders(adminKey),
+    }
+  )
+  return parseResponse(response)
+}
