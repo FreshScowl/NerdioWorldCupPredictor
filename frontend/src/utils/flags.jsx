@@ -1,58 +1,75 @@
 const TEAM_FLAGS = {
-  USA: 'US',
-  Paraguay: 'PY',
-  Australia: 'AU',
-  Ghana: 'GH',
-  Mexico: 'MX',
-  Ecuador: 'EC',
-  Japan: 'JP',
-  Tunisia: 'TN',
-  Canada: 'CA',
-  Uruguay: 'UY',
-  Morocco: 'MA',
-  Panama: 'PA',
-  Brazil: 'BR',
-  Colombia: 'CO',
-  Netherlands: 'NL',
-  Cameroon: 'CM',
+  Algeria: 'DZ',
   Argentina: 'AR',
-  Chile: 'CL',
+  Australia: 'AU',
+  Austria: 'AT',
   Belgium: 'BE',
-  Nigeria: 'NG',
-  France: 'FR',
-  Peru: 'PE',
-  Germany: 'DE',
-  'Saudi Arabia': 'SA',
-  England: 'EN',
-  Venezuela: 'VE',
-  Portugal: 'PT',
+  'Bosnia and Herzegovina': 'BA',
+  Brazil: 'BR',
+  'Cabo Verde': 'CV',
+  Canada: 'CA',
+  Colombia: 'CO',
+  Croatia: 'HR',
+  'Curaçao': 'CW',
+  'Czech Republic': 'CZ',
+  'DR Congo': 'CD',
+  Ecuador: 'EC',
   Egypt: 'EG',
-  Spain: 'ES',
-  Bolivia: 'BO',
-  Italy: 'IT',
+  England: 'EN',
+  France: 'FR',
+  Germany: 'DE',
+  Ghana: 'GH',
+  Haiti: 'HT',
+  Iran: 'IR',
+  Iraq: 'IQ',
+  'Ivory Coast': 'CI',
+  Japan: 'JP',
+  Jordan: 'JO',
+  'Korea Republic': 'KR',
+  Mexico: 'MX',
+  Morocco: 'MA',
+  Netherlands: 'NL',
+  'New Zealand': 'NZ',
+  Norway: 'NO',
+  Panama: 'PA',
+  Paraguay: 'PY',
+  Portugal: 'PT',
+  Qatar: 'QA',
+  'Saudi Arabia': 'SA',
+  Scotland: 'SC',
   Senegal: 'SN',
+  'South Africa': 'ZA',
+  Spain: 'ES',
+  Sweden: 'SE',
+  Switzerland: 'CH',
+  Tunisia: 'TN',
+  Turkey: 'TR',
+  USA: 'US',
+  Uruguay: 'UY',
+  Uzbekistan: 'UZ',
 }
 
-const PLAYER_FLAG_OVERRIDES = {
+const SPECIAL_TEAM_FLAGS = {
+  England: '🏴󠁧󠁢󠁥󠁮󠁧󠁿',
+  Scotland: '🏴󠁧󠁢󠁳󠁣󠁴󠁿',
+}
+
+const FLAG_CODE_OVERRIDES = {
   EN: 'GB',
-  WA: 'GB',
 }
 
 export function countryFlag(code) {
   if (!code) return ''
   const normalized = String(code).toUpperCase()
-  const flagCode = PLAYER_FLAG_OVERRIDES[normalized] || normalized
+  const flagCode = FLAG_CODE_OVERRIDES[normalized] || normalized
   return [...flagCode]
     .map((char) => String.fromCodePoint(127397 + char.charCodeAt(0)))
     .join('')
 }
 
-function teamFlagCode(teamName) {
-  return TEAM_FLAGS[teamName]
-}
-
 export function teamFlag(teamName) {
-  const code = teamFlagCode(teamName)
+  if (SPECIAL_TEAM_FLAGS[teamName]) return SPECIAL_TEAM_FLAGS[teamName]
+  const code = TEAM_FLAGS[teamName]
   return code ? countryFlag(code) : '🏳️'
 }
 
