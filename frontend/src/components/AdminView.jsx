@@ -97,8 +97,10 @@ export default function AdminView() {
     }
   }
 
+  let content
+
   if (!unlocked) {
-    return (
+    content = (
       <div className="admin-gate card">
         <p className="eyebrow">Admin access</p>
         <h2>Enter admin key</h2>
@@ -123,58 +125,66 @@ export default function AdminView() {
         </form>
       </div>
     )
-  }
+  } else if (loading) {
+    content = <div className="view-loading">Loading results…</div>
+  } else {
+    content = (
+      <div className="admin-view">
+        {error && <p className="banner banner-error">{error}</p>}
+        {message && <p className="banner banner-success">{message}</p>}
 
-  if (loading) {
-    return <div className="view-loading">Loading results…</div>
+        {GROUPS.map((group) => (
+          <section key={group} className="group-section card">
+            <h2>Group {group} — Results</h2>
+            <ul className="fixture-list">
+              {grouped[group].map((fixture) => {
+                const result = results[fixture.id] || {}
+                return (
+                  <li key={fixture.id} className="fixture-row">
+                    <span className="fixture-teams">
+                      {fixture.home} vs {fixture.away}
+                    </span>
+                    <div className="fixture-inputs">
+                      <ScoreInput
+                        value={result.home}
+                        onChange={(v) => updateResult(fixture.id, 'home', v)}
+                        label={`${fixture.home} score`}
+                      />
+                      <span className="fixture-separator">–</span>
+                      <ScoreInput
+                        value={result.away}
+                        onChange={(v) => updateResult(fixture.id, 'away', v)}
+                        label={`${fixture.away} score`}
+                      />
+                    </div>
+                  </li>
+                )
+              })}
+            </ul>
+          </section>
+        ))}
+
+        <div className="sticky-save">
+          <button
+            type="button"
+            className="btn btn-primary"
+            onClick={handleSave}
+            disabled={saving}
+          >
+            {saving ? 'Saving…' : 'Save results'}
+          </button>
+        </div>
+      </div>
+    )
   }
 
   return (
-    <div className="admin-view">
-      {error && <p className="banner banner-error">{error}</p>}
-      {message && <p className="banner banner-success">{message}</p>}
-
-      {GROUPS.map((group) => (
-        <section key={group} className="group-section card">
-          <h2>Group {group} — Results</h2>
-          <ul className="fixture-list">
-            {grouped[group].map((fixture) => {
-              const result = results[fixture.id] || {}
-              return (
-                <li key={fixture.id} className="fixture-row">
-                  <span className="fixture-teams">
-                    {fixture.home} vs {fixture.away}
-                  </span>
-                  <div className="fixture-inputs">
-                    <ScoreInput
-                      value={result.home}
-                      onChange={(v) => updateResult(fixture.id, 'home', v)}
-                      label={`${fixture.home} score`}
-                    />
-                    <span className="fixture-separator">–</span>
-                    <ScoreInput
-                      value={result.away}
-                      onChange={(v) => updateResult(fixture.id, 'away', v)}
-                      label={`${fixture.away} score`}
-                    />
-                  </div>
-                </li>
-              )
-            })}
-          </ul>
-        </section>
-      ))}
-
-      <div className="sticky-save">
-        <button
-          type="button"
-          className="btn btn-primary"
-          onClick={handleSave}
-          disabled={saving}
-        >
-          {saving ? 'Saving…' : 'Save results'}
-        </button>
-      </div>
+    <div className="admin-page">
+      <header className="admin-page-header">
+        <span className="eyebrow">Nerdio</span>
+        <h1>World Cup Predictor — Admin</h1>
+      </header>
+      <div className="admin-page-content">{content}</div>
     </div>
   )
 }

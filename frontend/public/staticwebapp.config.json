@@ -10,6 +10,18 @@
     {
       "route": "/api/*",
       "allowedRoles": ["anonymous", "authenticated"]
+    },
+    {
+      "route": "/admin",
+      "rewrite": "/index.html"
+    },
+    {
+      "route": "/predict",
+      "rewrite": "/index.html"
+    },
+    {
+      "route": "/leaderboard",
+      "rewrite": "/index.html"
     }
   ]
 }

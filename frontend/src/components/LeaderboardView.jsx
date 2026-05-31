@@ -184,7 +184,7 @@ export default function LeaderboardView({ email }) {
             <tbody>
               {leaderboard.map((row, index) => {
                 const isExpanded = expandedEmail === row.email
-                const isCurrent = row.email === email
+                const isCurrent = email && row.email === email
 
                 return (
                   <Fragment key={row.email}>

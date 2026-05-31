@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { isValidEmail, normalizeEmail, saveEmail } from '../utils/email'
 
-export default function EmailGate({ onComplete }) {
+export default function EmailGate({ onComplete, onCancel }) {
   const [email, setEmail] = useState('')
   const [error, setError] = useState('')
 
@@ -19,10 +19,10 @@ export default function EmailGate({ onComplete }) {
   }
 
   return (
-    <div className="gate">
-      <div className="gate-card">
-        <p className="eyebrow">Nerdio World Cup Predictor</p>
-        <h1>Sign in with your work email</h1>
+    <div className="email-gate-page">
+      <div className="gate-card card">
+        <p className="eyebrow">Get started</p>
+        <h1>Enter your work email</h1>
         <p className="gate-copy">
           Your email is your player identity for predictions and the leaderboard.
         </p>
@@ -41,9 +41,16 @@ export default function EmailGate({ onComplete }) {
             autoFocus
           />
           {error && <p className="form-error">{error}</p>}
-          <button type="submit" className="btn btn-primary">
-            Continue
-          </button>
+          <div className="form-actions">
+            {onCancel && (
+              <button type="button" className="btn btn-secondary" onClick={onCancel}>
+                Back
+              </button>
+            )}
+            <button type="submit" className="btn btn-primary">
+              Continue
+            </button>
+          </div>
         </form>
       </div>
     </div>
