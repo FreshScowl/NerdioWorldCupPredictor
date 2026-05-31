@@ -130,6 +130,13 @@
   display: flex;
   align-items: center;
   gap: 0.75rem;
+}
+
+.team-picker label {
+  margin-bottom: 0.4rem;
+}
+
+.team-picker .flag-picker {
   margin-bottom: 1rem;
 }
 

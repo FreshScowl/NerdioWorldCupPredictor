@@ -1,6 +1,6 @@
 const { app } = require('@azure/functions')
 const { createPlayer } = require('../lib/storage')
-const { isValidSupportedTeam, normalizeSupportedTeam } = require('../lib/teams')
+const { isValidSupportedTeam, normalizeSupportedTeam, resolveSupportedTeam } = require('../lib/teams')
 const { isAllowedEmail, isValidName, normalizeEmail, normalizeName } = require('../lib/validation')
 
 app.http('register', {

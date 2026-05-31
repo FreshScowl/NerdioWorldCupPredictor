@@ -6,6 +6,7 @@ const {
   verifyAdminKey,
 } = require('../lib/storage')
 const { isPredictionComplete } = require('../lib/scoring')
+const { resolveSupportedTeam } = require('../lib/teams')
 const { normalizeEmail } = require('../lib/validation')
 
 function summarizePlayer(doc) {
@@ -15,7 +16,7 @@ function summarizePlayer(doc) {
   return {
     email: doc.email,
     name: doc.name || doc.email.split('@')[0],
-    supportedTeam: doc.supportedTeam || null,
+    supportedTeam: resolveSupportedTeam(doc.supportedTeam),
     retired: !!doc.retired,
     retiredAt: doc.retiredAt || null,
     createdAt: doc.createdAt || null,

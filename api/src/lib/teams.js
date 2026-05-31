@@ -17,8 +17,16 @@ function isValidSupportedTeam(team) {
   return TEAM_SET.has(normalized)
 }
 
+function resolveSupportedTeam(value) {
+  const normalized = normalizeSupportedTeam(value)
+  if (!normalized) return null
+  if (TEAM_SET.has(normalized)) return normalized
+  return null
+}
+
 module.exports = {
   WORLD_CUP_TEAMS,
   normalizeSupportedTeam,
   isValidSupportedTeam,
+  resolveSupportedTeam,
 }

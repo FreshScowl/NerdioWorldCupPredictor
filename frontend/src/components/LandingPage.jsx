@@ -1,8 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { registerPlayer } from '../api'
-import { formatTeamOption, WORLD_CUP_TEAMS } from '../utils/teams'
-import { teamFlag } from '../utils/flags'
+import TeamPicker from './TeamPicker'
 import {
   isValidEmail,
   isValidName,
@@ -92,29 +91,15 @@ export default function LandingPage() {
             autoComplete="name"
           />
 
-          <label htmlFor="landing-team">What team do you support? (optional)</label>
-          <div className="flag-picker">
-            <select
-              id="landing-team"
-              value={supportedTeam}
-              onChange={(e) => {
-                setSupportedTeam(e.target.value)
-                setError('')
-              }}
-            >
-              <option value="">No team selected</option>
-              {WORLD_CUP_TEAMS.map((team) => (
-                <option key={team} value={team}>
-                  {formatTeamOption(team)}
-                </option>
-              ))}
-            </select>
-            {supportedTeam && (
-              <span className="flag-picker-preview" aria-hidden="true">
-                {teamFlag(supportedTeam)}
-              </span>
-            )}
-          </div>
+          <TeamPicker
+            id="landing-team"
+            label="What team do you support? (optional)"
+            value={supportedTeam}
+            onChange={(team) => {
+              setSupportedTeam(team)
+              setError('')
+            }}
+          />
 
           <label htmlFor="landing-email">Work email</label>
           <input

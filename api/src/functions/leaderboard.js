@@ -1,6 +1,7 @@
 const { app } = require('@azure/functions')
 const { getAllPredictions, getResults } = require('../lib/storage')
 const { calculatePlayerStats } = require('../lib/scoring')
+const { resolveSupportedTeam } = require('../lib/teams')
 
 app.http('leaderboard', {
   methods: ['GET'],
@@ -21,7 +22,7 @@ app.http('leaderboard', {
             doc.predictions,
             results,
             doc.name,
-            doc.supportedTeam
+            resolveSupportedTeam(doc.supportedTeam)
           )
         )
 
