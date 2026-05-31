@@ -1,0 +1,53 @@
+name: Azure Static Web Apps CI/CD
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy_infrastructure:
+    runs-on: ubuntu-latest
+    name: Deploy Infrastructure
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # AZURE_CREDENTIALS is a JSON object from:
+      #   az ad sp create-for-rbac \
+      #     --name "github-actions-nerdio-worldcup" \
+      #     --role contributor \
+      #     --scopes /subscriptions/<SUBSCRIPTION_ID>/resourceGroups/<AZURE_RG_NAME> \
+      #     --sdk-auth
+      # Add the full JSON output as a GitHub repository secret named AZURE_CREDENTIALS.
+      - name: Log in to Azure
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Deploy Bicep infrastructure
+        run: |
+          az deployment group create \
+            --resource-group "${{ secrets.AZURE_RG_NAME }}" \
+            --template-file infra/main.bicep \
+            --parameters infra/params/dev.bicepparam
+
+  build_and_deploy:
+    runs-on: ubuntu-latest
+    name: Build and Deploy
+    needs: deploy_infrastructure
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build and Deploy to Azure Static Web Apps
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          action: upload
+          app_location: /frontend
+          api_location: /api
+          output_location: dist
+          app_build_command: npm run build
+          api_build_command: npm install --production

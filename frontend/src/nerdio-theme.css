@@ -1,0 +1,61 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap');
+
+:root {
+  /* Brand colours */
+  --color-navy-orbit: #042838;
+  --color-nerdio-blue: #1e9db8;
+  --color-white-glacier: #ffffff;
+  --color-green-galaxy: #cdff4e;
+  --color-proton-purple: #a795c7;
+
+  /* Semantic colour roles (Navy + White ~75% of any design) */
+  --color-bg-primary: var(--color-navy-orbit);
+  --color-bg-surface: var(--color-white-glacier);
+  --color-bg-header: var(--color-navy-orbit);
+  --color-bg-sidebar: var(--color-navy-orbit);
+
+  /* Nerdio Blue — CTAs, buttons, links, interactive elements, badges */
+  --color-interactive: var(--color-nerdio-blue);
+  --color-cta: var(--color-nerdio-blue);
+  --color-link: var(--color-nerdio-blue);
+  --color-badge: var(--color-nerdio-blue);
+
+  /* Green Galaxy — success states and key highlights only (use sparingly) */
+  --color-success: var(--color-green-galaxy);
+  --color-highlight: var(--color-green-galaxy);
+
+  /* Proton Purple — secondary accents, tags, charts (use sparingly) */
+  --color-accent-secondary: var(--color-proton-purple);
+  --color-tag: var(--color-proton-purple);
+  --color-chart: var(--color-proton-purple);
+
+  /* Text — never use Nerdio Blue as small body text on white (WCAG AA) */
+  --color-text-primary: var(--color-navy-orbit);
+  --color-text-inverse: var(--color-white-glacier);
+
+  /* Typography — font families */
+  --font-primary: 'Poppins', sans-serif;
+  --font-secondary: 'Roboto Mono', monospace;
+
+  /* Typography — weights */
+  --font-weight-light: 300;
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* Typography — roles */
+  --font-heading: var(--font-primary);
+  --font-heading-weight: var(--font-weight-semibold);
+  --font-body: var(--font-primary);
+  --font-body-weight: var(--font-weight-regular);
+  --font-body-size-min: 14px;
+  --font-body-size-max: 16px;
+  --font-body-line-height: 1.5;
+  --font-label: var(--font-primary);
+  --font-label-weight: var(--font-weight-semibold);
+  --font-label-transform: uppercase;
+  --font-label-letter-spacing: 0.25em;
+  --font-code: var(--font-secondary);
+  --font-code-weight: var(--font-weight-medium);
+}
