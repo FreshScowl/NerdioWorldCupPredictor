@@ -8,7 +8,7 @@ set -euo pipefail
 #   - Bicep CLI (included with Azure CLI 2.20+)
 #
 # Before running:
-#   1. Edit infra/params/dev.bicepparam — set repositoryUrl, repositoryToken, and adminKey
+#   1. Edit infra/params/dev.bicepparam — set adminKey
 #   2. Set RESOURCE_GROUP below to your desired resource group name
 
 RESOURCE_GROUP="nerdio-worldcup-dev-rg"

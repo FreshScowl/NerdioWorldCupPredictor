@@ -1,4 +1,5 @@
 const { app } = require('@azure/functions')
+const { assertPredictionsOpen } = require('../lib/deadline')
 const { upsertPredictions } = require('../lib/storage')
 const { isAllowedEmail, normalizeEmail } = require('../lib/validation')
 
@@ -8,6 +9,8 @@ app.http('predictionsPost', {
   route: 'predictions',
   handler: async (request) => {
     try {
+      assertPredictionsOpen()
+
       const body = await request.json()
       const email = normalizeEmail(body.email)
 

@@ -1,4 +1,4 @@
-name: Azure Static Web Apps CI/CD
+name: Deploy NWCP
 
 on:
   push:
@@ -31,25 +31,55 @@ jobs:
       - name: Deploy Bicep infrastructure
         run: |
           az deployment group create \
-            --resource-group "${{ secrets.AZURE_RG_NAME }}" \
+            --resource-group RG-NERDIO-ULB-01 \
             --template-file infra/main.bicep \
             --parameters infra/params/dev.bicepparam
 
-  build_and_deploy:
+  deploy_api:
     runs-on: ubuntu-latest
-    name: Build and Deploy
+    name: Build and Deploy API
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Build and Deploy to Azure Static Web Apps
-        uses: Azure/static-web-apps-deploy@v1
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          action: upload
-          app_location: /nwcp
-          api_location: /api
-          output_location: dist
-          app_build_command: npm run build
-          api_build_command: npm install --production
+          node-version: '22'
+
+      - name: Install API dependencies
+        working-directory: api
+        run: npm install --production
+
+      - name: Deploy Azure Functions
+        uses: Azure/functions-action@v1
+        with:
+          app-name: func-nerdio-worldcup-dev
+          package: api
+          publish-profile: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }}
+
+  deploy_app:
+    runs-on: ubuntu-latest
+    name: Build and Deploy App Service
+    needs: deploy_api
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install and build frontend
+        working-directory: nwcp
+        run: |
+          npm ci
+          npm run build
+
+      - name: Deploy to App Service
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: app-nerdio-worldcup-dev
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+          package: nwcp

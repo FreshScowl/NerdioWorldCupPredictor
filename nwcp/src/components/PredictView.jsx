@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { FIXTURES, fixturesByGroup, GROUPS, TOTAL_FIXTURES } from '../fixtures'
 import { getPredictions, getResults, savePredictions } from '../api'
+import { arePredictionsOpen, predictionsClosedMessage } from '../utils/deadline'
 import { isPredictionComplete, scorePrediction } from '../utils/scoring'
 
 function PointsBadge({ points }) {
@@ -12,7 +13,7 @@ function PointsBadge({ points }) {
   return <span className={className}>+{points}</span>
 }
 
-function ScoreInput({ value, onChange, label }) {
+function ScoreInput({ value, onChange, label, disabled }) {
   return (
     <input
       type="number"
@@ -20,6 +21,7 @@ function ScoreInput({ value, onChange, label }) {
       max="99"
       className="score-input"
       value={value ?? ''}
+      disabled={disabled}
       onChange={(e) => {
         const raw = e.target.value
         if (raw === '') {
@@ -41,6 +43,7 @@ export default function PredictView({ email }) {
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
+  const predictionsOpen = arePredictionsOpen()
 
   const grouped = useMemo(() => fixturesByGroup(), [])
 
@@ -80,6 +83,8 @@ export default function PredictView({ email }) {
   }, [predictions, results])
 
   function updatePrediction(fixtureId, side, value) {
+    if (!predictionsOpen) return
+
     setPredictions((prev) => ({
       ...prev,
       [fixtureId]: {
@@ -91,6 +96,11 @@ export default function PredictView({ email }) {
   }
 
   async function handleSave() {
+    if (!predictionsOpen) {
+      setError(predictionsClosedMessage())
+      return
+    }
+
     setSaving(true)
     setError('')
     setMessage('')
@@ -110,6 +120,10 @@ export default function PredictView({ email }) {
 
   return (
     <div className="predict-view">
+      {!predictionsOpen && (
+        <p className="banner banner-error predictions-closed-banner">{predictionsClosedMessage()}</p>
+      )}
+
       <div className="stats-bar card">
         <div className="stat">
           <span className="stat-label">Total points</span>
@@ -148,12 +162,14 @@ export default function PredictView({ email }) {
                       value={prediction.home}
                       onChange={(v) => updatePrediction(fixture.id, 'home', v)}
                       label={`${fixture.home} score`}
+                      disabled={!predictionsOpen}
                     />
                     <span className="fixture-separator">–</span>
                     <ScoreInput
                       value={prediction.away}
                       onChange={(v) => updatePrediction(fixture.id, 'away', v)}
                       label={`${fixture.away} score`}
+                      disabled={!predictionsOpen}
                     />
                     <PointsBadge points={points} />
                   </div>
@@ -164,16 +180,18 @@ export default function PredictView({ email }) {
         </section>
       ))}
 
-      <div className="sticky-save">
-        <button
-          type="button"
-          className="btn btn-primary"
-          onClick={handleSave}
-          disabled={saving}
-        >
-          {saving ? 'Saving…' : 'Save predictions'}
-        </button>
-      </div>
+      {predictionsOpen && (
+        <div className="sticky-save">
+          <button
+            type="button"
+            className="btn btn-primary"
+            onClick={handleSave}
+            disabled={saving}
+          >
+            {saving ? 'Saving…' : 'Save predictions'}
+          </button>
+        </div>
+      )}
     </div>
   )
 }

@@ -1,5 +1,5 @@
 using '../main.bicep'
 
 param appName = 'nerdio-worldcup-dev'
-param location = 'uksouth'
+param location = 'eastus'
 param adminKey = 'GhostBusters321123!'
