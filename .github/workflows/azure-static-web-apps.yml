@@ -7,6 +7,9 @@ on:
 
 jobs:
   deploy_infrastructure:
+    # Bicep is already deployed — skip for now. Re-enable when infra/** changes:
+    #   if: contains(github.event.head_commit.modified, 'infra/')  (or use dorny/paths-filter)
+    if: false
     runs-on: ubuntu-latest
     name: Deploy Infrastructure
     steps:
@@ -35,7 +38,6 @@ jobs:
   build_and_deploy:
     runs-on: ubuntu-latest
     name: Build and Deploy
-    needs: deploy_infrastructure
     steps:
       - name: Checkout
         uses: actions/checkout@v4

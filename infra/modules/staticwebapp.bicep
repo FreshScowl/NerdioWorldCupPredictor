@@ -1,61 +1,42 @@
 @description('Static Web App name')
 param name string
 
-@description('Static Web Apps region (eastus2 supports Free tier)')
-param location string = 'eastus2'
-
-@description('GitHub repository URL')
-param repositoryUrl string
-
-@description('GitHub personal access token with repo scope')
-@secure()
-param repositoryToken string
+@description('Resource tags')
+param tags object = {}
 
 @description('Cosmos DB database name')
 param cosmosDbName string
 
-@description('Key Vault secret URI for CosmosConnectionString')
-param cosmosSecretUri string
+@description('Cosmos DB connection string')
+@secure()
+param cosmosConnectionString string
 
-@description('Key Vault secret URI for AdminKey')
-param adminSecretUri string
+@description('Admin key for POST /api/results')
+@secure()
+param adminKey string
 
-resource staticWebApp 'Microsoft.Web/staticSites@2023-12-01' = {
+// Static Web Apps Free tier is only available in eastus2
+var staticWebAppLocation = 'eastus2'
+
+resource staticWebApp 'Microsoft.Web/staticSites@2022-03-01' = {
   name: name
-  location: location
+  location: staticWebAppLocation
+  tags: tags
   sku: {
     name: 'Free'
     tier: 'Free'
   }
-  identity: {
-    type: 'SystemAssigned'
-  }
-  properties: {
-    repositoryUrl: repositoryUrl
-    branch: 'main'
-    provider: 'GitHub'
-    repositoryToken: repositoryToken
-    stagingEnvironmentPolicy: 'Enabled'
-    allowConfigFileUpdates: true
-    buildProperties: {
-      appLocation: '/frontend'
-      apiLocation: '/api'
-      outputLocation: 'dist'
-      skipGithubActionWorkflowGeneration: true
-    }
-  }
+  properties: {}
 }
 
-resource appSettings 'Microsoft.Web/staticSites/config@2023-12-01' = {
+resource appSettings 'Microsoft.Web/staticSites/config@2022-03-01' = {
   parent: staticWebApp
   name: 'appsettings'
   properties: {
-    COSMOS_CONNECTION_STRING: '@Microsoft.KeyVault(SecretUri=${cosmosSecretUri})'
+    COSMOS_CONNECTION_STRING: cosmosConnectionString
     COSMOS_DB_NAME: cosmosDbName
-    ADMIN_KEY: '@Microsoft.KeyVault(SecretUri=${adminSecretUri})'
+    ADMIN_KEY: adminKey
   }
 }
 
 output defaultHostname string = staticWebApp.properties.defaultHostname
-output principalId string = staticWebApp.identity.principalId
-output staticWebAppId string = staticWebApp.id
