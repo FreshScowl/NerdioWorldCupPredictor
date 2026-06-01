@@ -1,4 +1,4 @@
-const { app } = require('@azure/functions')
+const { registerHttp } = require('../lib/registerHttp')
 const {
   deletePlayer,
   getAllPredictions,
@@ -8,6 +8,7 @@ const {
 const { isPredictionComplete } = require('../lib/scoring')
 const { resolveSupportedTeam } = require('../lib/teams')
 const { normalizeEmail } = require('../lib/validation')
+const { internalError } = require('../lib/errors')
 
 function summarizePlayer(doc) {
   const predictions = doc.predictions || {}
@@ -24,10 +25,10 @@ function summarizePlayer(doc) {
   }
 }
 
-app.http('adminPlayersList', {
+registerHttp('adminPlayersList', {
   methods: ['GET'],
   authLevel: 'anonymous',
-  route: 'admin/players',
+  route: 'manage/players',
   handler: async (request) => {
     if (!verifyAdminKey(request)) {
       return { status: 401, jsonBody: { error: 'Unauthorized' } }
@@ -40,15 +41,15 @@ app.http('adminPlayersList', {
 
       return { jsonBody: players }
     } catch (err) {
-      return { status: 500, jsonBody: { error: err.message } }
+      return internalError(err, 'adminPlayersList')
     }
   },
 })
 
-app.http('adminPlayerRetire', {
+registerHttp('adminPlayerRetire', {
   methods: ['POST'],
   authLevel: 'anonymous',
-  route: 'admin/players/{email}/retire',
+  route: 'manage/players/{email}/retire',
   handler: async (request) => {
     if (!verifyAdminKey(request)) {
       return { status: 401, jsonBody: { error: 'Unauthorized' } }
@@ -65,15 +66,15 @@ app.http('adminPlayerRetire', {
     } catch (err) {
       if (err.code === 404) return { status: 404, jsonBody: { error: err.message } }
       if (err.code === 400) return { status: 400, jsonBody: { error: err.message } }
-      return { status: 500, jsonBody: { error: err.message } }
+      return internalError(err, 'adminPlayerRetire')
     }
   },
 })
 
-app.http('adminPlayerDelete', {
+registerHttp('adminPlayerDelete', {
   methods: ['DELETE'],
   authLevel: 'anonymous',
-  route: 'admin/players/{email}',
+  route: 'manage/players/{email}',
   handler: async (request) => {
     if (!verifyAdminKey(request)) {
       return { status: 401, jsonBody: { error: 'Unauthorized' } }
@@ -89,7 +90,7 @@ app.http('adminPlayerDelete', {
       return { jsonBody: result }
     } catch (err) {
       if (err.code === 404) return { status: 404, jsonBody: { error: err.message } }
-      return { status: 500, jsonBody: { error: err.message } }
+      return internalError(err, 'adminPlayerDelete')
     }
   },
 })

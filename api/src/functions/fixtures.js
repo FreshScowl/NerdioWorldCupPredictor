@@ -1,7 +1,7 @@
-const { app } = require('@azure/functions')
+const { registerHttp } = require('../lib/registerHttp')
 const { FIXTURES } = require('../../fixtures')
 
-app.http('fixtures', {
+registerHttp('fixtures', {
   methods: ['GET'],
   authLevel: 'anonymous',
   route: 'fixtures',

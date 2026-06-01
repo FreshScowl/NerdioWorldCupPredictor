@@ -1,8 +1,9 @@
-const { app } = require('@azure/functions')
+const { registerHttp } = require('../lib/registerHttp')
 const { getPredictionsDocument, getResults } = require('../lib/storage')
 const { normalizeEmail } = require('../lib/validation')
+const { internalError } = require('../lib/errors')
 
-app.http('predictionsGet', {
+registerHttp('predictionsGet', {
   methods: ['GET'],
   authLevel: 'anonymous',
   route: 'predictions/{email}',
@@ -40,7 +41,7 @@ app.http('predictionsGet', {
         },
       }
     } catch (err) {
-      return { status: 500, jsonBody: { error: err.message } }
+      return internalError(err, 'predictionsGet')
     }
   },
 })

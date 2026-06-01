@@ -12,6 +12,10 @@ param cosmosConnectionString string
 @secure()
 param adminKey string
 
+@description('Shared secret for App Service to Function App proxy')
+@secure()
+param apiProxyKey string
+
 resource keyVault 'Microsoft.KeyVault/vaults@2023-07-01' = {
   name: vaultName
   location: location
@@ -44,7 +48,16 @@ resource adminKeySecret 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
   }
 }
 
+resource apiProxyKeySecret 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
+  parent: keyVault
+  name: 'ApiProxyKey'
+  properties: {
+    value: apiProxyKey
+  }
+}
+
 output vaultName string = keyVault.name
 output vaultUri string = keyVault.properties.vaultUri
 output cosmosSecretUri string = cosmosConnectionSecret.properties.secretUri
 output adminSecretUri string = adminKeySecret.properties.secretUri
+output apiProxySecretUri string = apiProxyKeySecret.properties.secretUri

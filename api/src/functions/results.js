@@ -1,8 +1,9 @@
-const { app } = require('@azure/functions')
+const { registerHttp } = require('../lib/registerHttp')
 const { getResults, upsertResults, verifyAdminKey } = require('../lib/storage')
 const { normalizeResults } = require('../lib/validation')
+const { internalError } = require('../lib/errors')
 
-app.http('results', {
+registerHttp('results', {
   methods: ['GET', 'POST'],
   authLevel: 'anonymous',
   route: 'results',
@@ -22,7 +23,7 @@ app.http('results', {
       await upsertResults(results)
       return { jsonBody: { success: true, results } }
     } catch (err) {
-      return { status: 500, jsonBody: { error: err.message } }
+      return internalError(err, 'results')
     }
   },
 })

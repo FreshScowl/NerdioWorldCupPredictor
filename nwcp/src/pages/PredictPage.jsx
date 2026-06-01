@@ -1,12 +1,10 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { getPredictions } from '../api'
-import { clearEmail, loadEmail, saveName, saveSupportedTeam } from '../utils/email'
-import EmailGate from '../components/EmailGate'
+import { clearEmail, loadEmail, saveName, savePlayerId, saveSupportedTeam } from '../utils/email'
+import LandingPage from '../components/LandingPage'
 import PredictView from '../components/PredictView'
 
 export default function PredictPage() {
-  const navigate = useNavigate()
   const [email, setEmail] = useState(null)
   const [checking, setChecking] = useState(true)
 
@@ -29,6 +27,7 @@ export default function PredictPage() {
         } else {
           if (data.name) saveName(data.name)
           if (data.supportedTeam) saveSupportedTeam(data.supportedTeam)
+          if (data.playerId) savePlayerId(data.playerId)
           setEmail(stored)
         }
       } catch {
@@ -41,21 +40,12 @@ export default function PredictPage() {
     init()
   }, [])
 
-  function handleEmailComplete(nextEmail) {
-    setEmail(nextEmail)
-  }
-
   if (checking) {
     return <div className="view-loading">Loading…</div>
   }
 
   if (!email) {
-    return (
-      <EmailGate
-        onComplete={handleEmailComplete}
-        onCancel={() => navigate('/')}
-      />
-    )
+    return <LandingPage />
   }
 
   return <PredictView email={email} />

@@ -1,10 +1,7 @@
-import { GROUPS } from '../fixtures'
-import { getTeamsByGroup } from '../utils/teams'
+import { WORLD_CUP_TEAMS } from '../utils/teams'
 import { teamFlag } from '../utils/flags'
 
 export default function TeamPicker({ id, label, value, onChange, optional = true }) {
-  const teamsByGroup = getTeamsByGroup()
-
   return (
     <div className="team-picker">
       <label htmlFor={id}>{label}</label>
@@ -14,15 +11,11 @@ export default function TeamPicker({ id, label, value, onChange, optional = true
           value={value}
           onChange={(e) => onChange(e.target.value)}
         >
-          {optional && <option value="">No team selected</option>}
-          {GROUPS.map((group) => (
-            <optgroup key={group} label={`Group ${group}`}>
-              {teamsByGroup[group].map((team) => (
-                <option key={team} value={team}>
-                  {team}
-                </option>
-              ))}
-            </optgroup>
+          {optional && <option value="">n/a</option>}
+          {WORLD_CUP_TEAMS.map((team) => (
+            <option key={team} value={team}>
+              {teamFlag(team)} {team}
+            </option>
           ))}
         </select>
         {value && (

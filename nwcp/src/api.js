@@ -19,6 +19,13 @@ export async function getPredictions(email) {
   return parseResponse(response)
 }
 
+export async function getPredictionsByPlayerId(playerId) {
+  const response = await fetch(
+    apiUrl(`/api/predictions/player/${encodeURIComponent(playerId)}`)
+  )
+  return parseResponse(response)
+}
+
 export async function savePredictions(email, predictions) {
   const response = await fetch(apiUrl('/api/predictions'), {
     method: 'POST',
@@ -43,7 +50,7 @@ export async function registerPlayer(email, name, supportedTeam = null) {
 }
 
 export async function verifyAdmin(adminKey) {
-  const response = await fetch(apiUrl('/api/admin/verify'), {
+  const response = await fetch(apiUrl('/api/manage/verify'), {
     headers: { 'x-admin-key': adminKey },
   })
   return parseResponse(response)
@@ -71,7 +78,7 @@ function adminHeaders(adminKey) {
 }
 
 export async function getAdminPlayers(adminKey) {
-  const response = await fetch(apiUrl('/api/admin/players'), {
+  const response = await fetch(apiUrl('/api/manage/players'), {
     headers: adminHeaders(adminKey),
   })
   return parseResponse(response)
@@ -79,7 +86,7 @@ export async function getAdminPlayers(adminKey) {
 
 export async function retireAdminPlayer(adminKey, email) {
   const response = await fetch(
-    apiUrl(`/api/admin/players/${encodeURIComponent(email)}/retire`),
+    apiUrl(`/api/manage/players/${encodeURIComponent(email)}/retire`),
     {
       method: 'POST',
       headers: adminHeaders(adminKey),
@@ -90,7 +97,7 @@ export async function retireAdminPlayer(adminKey, email) {
 
 export async function deleteAdminPlayer(adminKey, email) {
   const response = await fetch(
-    apiUrl(`/api/admin/players/${encodeURIComponent(email)}`),
+    apiUrl(`/api/manage/players/${encodeURIComponent(email)}`),
     {
       method: 'DELETE',
       headers: adminHeaders(adminKey),

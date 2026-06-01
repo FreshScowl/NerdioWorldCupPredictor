@@ -1,4 +1,4 @@
-@description('Azure region for Function App resources')
+@description('Azure region for App Service resources')
 param location string
 
 @description('Resource tags')
@@ -7,13 +7,14 @@ param tags object = {}
 @description('Cosmos DB database name')
 param cosmosDbName string
 
-@description('Cosmos DB connection string')
-@secure()
-param cosmosConnectionString string
+@description('Key Vault secret URI for Cosmos connection string')
+param cosmosSecretUri string
 
-@description('Admin key for POST /api/results')
-@secure()
-param adminKey string
+@description('Key Vault secret URI for admin key')
+param adminSecretUri string
+
+@description('Key Vault secret URI for API proxy key')
+param apiProxySecretUri string
 
 var funcName = 'func-nerdio-worldcup-dev'
 var storageAccountName = take('nwcpfunc${uniqueString(resourceGroup().id)}', 24)
@@ -49,6 +50,7 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
   properties: {
     serverFarmId: appServicePlan.id
     httpsOnly: true
+    keyVaultReferenceIdentity: 'SystemAssigned'
     siteConfig: {
       linuxFxVersion: 'Node|20'
       alwaysOn: true
@@ -56,6 +58,14 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
         {
           name: 'AzureWebJobsFeatureFlags'
           value: 'EnableWorkerIndexing'
+        }
+        {
+          name: 'SCM_DO_BUILD_DURING_DEPLOYMENT'
+          value: 'false'
+        }
+        {
+          name: 'ENABLE_ORYX_BUILD'
+          value: 'false'
         }
         {
           name: 'AzureWebJobsStorage'
@@ -79,7 +89,7 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
         }
         {
           name: 'COSMOS_CONNECTION_STRING'
-          value: cosmosConnectionString
+          value: '@Microsoft.KeyVault(SecretUri=${cosmosSecretUri})'
         }
         {
           name: 'COSMOS_DB_NAME'
@@ -87,7 +97,11 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
         }
         {
           name: 'ADMIN_KEY'
-          value: adminKey
+          value: '@Microsoft.KeyVault(SecretUri=${adminSecretUri})'
+        }
+        {
+          name: 'API_PROXY_KEY'
+          value: '@Microsoft.KeyVault(SecretUri=${apiProxySecretUri})'
         }
       ]
     }
@@ -97,3 +111,4 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
 output defaultHostname string = functionApp.properties.defaultHostName
 output functionAppName string = functionApp.name
 output apiBaseUrl string = 'https://${functionApp.properties.defaultHostName}'
+output principalId string = functionApp.identity.principalId

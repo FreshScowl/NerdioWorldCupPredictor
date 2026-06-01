@@ -1,4 +1,7 @@
 const ALLOWED_DOMAIN = 'getnerdio.com'
+const { FIXTURES } = require('../../fixtures')
+
+const FIXTURE_IDS = new Set(FIXTURES.map((fixture) => fixture.id))
 
 function normalizeEmail(email) {
   return (email || '').trim().toLowerCase()
@@ -46,6 +49,42 @@ function normalizeResults(results) {
   return normalized
 }
 
+function normalizePredictions(predictions) {
+  const normalized = {}
+
+  if (!predictions || typeof predictions !== 'object') return normalized
+
+  for (const [fixtureId, score] of Object.entries(predictions)) {
+    if (!FIXTURE_IDS.has(fixtureId)) continue
+    if (!score || typeof score !== 'object') continue
+
+    const homeRaw = score.home
+    const awayRaw = score.away
+
+    if (homeRaw === '' || homeRaw == null || awayRaw === '' || awayRaw == null) {
+      continue
+    }
+
+    const home = Number(homeRaw)
+    const away = Number(awayRaw)
+
+    if (
+      !Number.isInteger(home) ||
+      !Number.isInteger(away) ||
+      home < 0 ||
+      away < 0 ||
+      home > 99 ||
+      away > 99
+    ) {
+      continue
+    }
+
+    normalized[fixtureId] = { home, away }
+  }
+
+  return normalized
+}
+
 module.exports = {
   ALLOWED_DOMAIN,
   normalizeEmail,
@@ -53,4 +92,5 @@ module.exports = {
   normalizeName,
   isValidName,
   normalizeResults,
+  normalizePredictions,
 }

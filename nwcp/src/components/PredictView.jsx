@@ -4,15 +4,6 @@ import { getPredictions, getResults, savePredictions } from '../api'
 import { arePredictionsOpen, predictionsClosedMessage } from '../utils/deadline'
 import { isPredictionComplete, scorePrediction } from '../utils/scoring'
 
-function PointsBadge({ points }) {
-  if (points === null) return null
-
-  const className =
-    points === 3 ? 'points-badge exact' : points === 1 ? 'points-badge partial' : 'points-badge wrong'
-
-  return <span className={className}>+{points}</span>
-}
-
 function ScoreInput({ value, onChange, label, disabled }) {
   return (
     <input
@@ -146,11 +137,6 @@ export default function PredictView({ email }) {
           <ul className="fixture-list">
             {grouped[group].map((fixture) => {
               const prediction = predictions[fixture.id] || {}
-              const actual = results[fixture.id]
-              const points =
-                isPredictionComplete(prediction) && actual
-                  ? scorePrediction(prediction, actual)
-                  : null
 
               return (
                 <li key={fixture.id} className="fixture-row">
@@ -171,7 +157,6 @@ export default function PredictView({ email }) {
                       label={`${fixture.away} score`}
                       disabled={!predictionsOpen}
                     />
-                    <PointsBadge points={points} />
                   </div>
                 </li>
               )

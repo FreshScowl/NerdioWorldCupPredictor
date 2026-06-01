@@ -27,7 +27,7 @@ function isPredictionComplete(prediction) {
   )
 }
 
-function calculatePlayerStats(email, predictions, results, name, supportedTeam) {
+function calculatePlayerStats(email, predictions, results, name, supportedTeam, playerId = null) {
   let totalPoints = 0
   let exactScores = 0
   let correctResults = 0
@@ -54,7 +54,7 @@ function calculatePlayerStats(email, predictions, results, name, supportedTeam) 
   }
 
   return {
-    email,
+    playerId: playerId || null,
     name: name || email.split('@')[0],
     supportedTeam: supportedTeam || null,
     totalPoints,

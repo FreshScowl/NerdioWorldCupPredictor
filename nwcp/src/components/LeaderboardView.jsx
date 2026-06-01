@@ -1,9 +1,10 @@
 import { Fragment, useEffect, useState } from 'react'
 import { FIXTURES, TOTAL_FIXTURES } from '../fixtures'
-import { getLeaderboard, getPredictions } from '../api'
+import { getLeaderboard, getPredictionsByPlayerId } from '../api'
 import { PlayerWithFlag } from '../utils/flags.jsx'
 import { TeamWithFlag } from '../utils/flags.jsx'
 import { isPredictionComplete, scorePrediction } from '../utils/scoring'
+import { loadPlayerId } from '../utils/email'
 
 function PointsBadge({ points, showScore }) {
   if (!showScore) {
@@ -110,7 +111,7 @@ export default function LeaderboardView({ email }) {
   const [leaderboard, setLeaderboard] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
-  const [expandedEmail, setExpandedEmail] = useState(null)
+  const [expandedPlayerId, setExpandedPlayerId] = useState(null)
   const [panelData, setPanelData] = useState(null)
   const [panelLoading, setPanelLoading] = useState(false)
   const [panelError, setPanelError] = useState('')
@@ -129,21 +130,26 @@ export default function LeaderboardView({ email }) {
     load()
   }, [])
 
-  async function handleRowClick(rowEmail) {
-    if (expandedEmail === rowEmail) {
-      setExpandedEmail(null)
+  async function handleRowClick(playerId) {
+    if (!playerId) {
+      setPanelError('Player details are unavailable. Refresh the page and try again.')
+      return
+    }
+
+    if (expandedPlayerId === playerId) {
+      setExpandedPlayerId(null)
       setPanelData(null)
       setPanelError('')
       return
     }
 
-    setExpandedEmail(rowEmail)
+    setExpandedPlayerId(playerId)
     setPanelLoading(true)
     setPanelError('')
     setPanelData(null)
 
     try {
-      const data = await getPredictions(rowEmail)
+      const data = await getPredictionsByPlayerId(playerId)
       setPanelData({
         predictions: data.predictions || {},
         results: data.results || {},
@@ -185,11 +191,12 @@ export default function LeaderboardView({ email }) {
             </thead>
             <tbody>
               {leaderboard.map((row, index) => {
-                const isExpanded = expandedEmail === row.email
-                const isCurrent = email && row.email === email
+                const isExpanded = expandedPlayerId === row.playerId
+                const currentPlayerId = loadPlayerId()
+                const isCurrent = currentPlayerId && row.playerId === currentPlayerId
 
                 return (
-                  <Fragment key={row.email}>
+                  <Fragment key={row.playerId || row.name}>
                     <tr
                       className={[
                         'leaderboard-row',
@@ -198,14 +205,14 @@ export default function LeaderboardView({ email }) {
                       ]
                         .filter(Boolean)
                         .join(' ')}
-                      onClick={() => handleRowClick(row.email)}
+                      onClick={() => handleRowClick(row.playerId)}
                       role="button"
                       tabIndex={0}
                       aria-expanded={isExpanded}
                       onKeyDown={(e) => {
                         if (e.key === 'Enter' || e.key === ' ') {
                           e.preventDefault()
-                          handleRowClick(row.email)
+                          handleRowClick(row.playerId)
                         }
                       }}
                     >

@@ -8,6 +8,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const distPath = path.join(__dirname, 'dist')
 const port = Number(process.env.PORT) || 3000
 const apiBase = (process.env.API_BASE_URL || '').replace(/\/$/, '')
+const apiProxyKey = process.env.API_PROXY_KEY || ''
 
 process.on('uncaughtException', (error) => {
   console.error('Uncaught exception:', error)
@@ -26,14 +27,33 @@ if (!fs.existsSync(distPath)) {
 
 const app = express()
 
+app.use((_req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff')
+  res.setHeader('X-Frame-Options', 'DENY')
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin')
+  res.setHeader('Permissions-Policy', 'geolocation=(), microphone=(), camera=()')
+  res.setHeader(
+    'Content-Security-Policy',
+    "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; style-src-elem 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data:; connect-src 'self'; font-src 'self' https://fonts.gstatic.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+  )
+  next()
+})
+
 if (apiBase) {
   console.log(`Proxying /api to ${apiBase}`)
   app.use(
-    '/api',
     createProxyMiddleware({
       target: apiBase,
       changeOrigin: true,
       secure: true,
+      pathFilter: '/api/**',
+      on: {
+        proxyReq: (proxyReq) => {
+          if (apiProxyKey) {
+            proxyReq.setHeader('x-api-proxy-key', apiProxyKey)
+          }
+        },
+      },
       onError: (error, req, res) => {
         console.error(`API proxy error for ${req.url}:`, error.message)
         if (!res.headersSent) {

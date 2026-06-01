@@ -9,6 +9,7 @@ import {
   normalizeName,
   saveEmail,
   saveName,
+  savePlayerId,
   saveSupportedTeam,
 } from '../utils/email'
 
@@ -40,10 +41,11 @@ export default function LandingPage() {
     setError('')
 
     try {
-      await registerPlayer(normalizedEmail, normalizedName, selectedTeam)
+      const doc = await registerPlayer(normalizedEmail, normalizedName, selectedTeam)
       saveEmail(normalizedEmail)
       saveName(normalizedName)
       saveSupportedTeam(selectedTeam)
+      if (doc.playerId) savePlayerId(doc.playerId)
       navigate('/predict')
     } catch (err) {
       setError(err.message)

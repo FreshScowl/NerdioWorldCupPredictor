@@ -1,10 +1,10 @@
-const { app } = require('@azure/functions')
+const { registerHttp } = require('../lib/registerHttp')
 const { verifyAdminKey } = require('../lib/storage')
 
-app.http('adminVerify', {
+registerHttp('adminVerify', {
   methods: ['GET'],
   authLevel: 'anonymous',
-  route: 'admin/verify',
+  route: 'manage/verify',
   handler: async (request) => {
     if (!verifyAdminKey(request)) {
       return { status: 401, jsonBody: { error: 'Unauthorized' } }

@@ -1,9 +1,10 @@
-const { app } = require('@azure/functions')
+const { registerHttp } = require('../lib/registerHttp')
 const { assertPredictionsOpen } = require('../lib/deadline')
 const { upsertPredictions } = require('../lib/storage')
-const { isAllowedEmail, normalizeEmail } = require('../lib/validation')
+const { isAllowedEmail, normalizeEmail, normalizePredictions } = require('../lib/validation')
+const { internalError } = require('../lib/errors')
 
-app.http('predictionsPost', {
+registerHttp('predictionsPost', {
   methods: ['POST'],
   authLevel: 'anonymous',
   route: 'predictions',
@@ -25,7 +26,7 @@ app.http('predictionsPost', {
         }
       }
 
-      const doc = await upsertPredictions(email, body.predictions || {})
+      const doc = await upsertPredictions(email, normalizePredictions(body.predictions))
       return { jsonBody: doc }
     } catch (err) {
       if (err.code === 404) {
@@ -34,7 +35,7 @@ app.http('predictionsPost', {
       if (err.code === 403) {
         return { status: 403, jsonBody: { error: err.message } }
       }
-      return { status: 500, jsonBody: { error: err.message } }
+      return internalError(err, 'predictionsPost')
     }
   },
 })

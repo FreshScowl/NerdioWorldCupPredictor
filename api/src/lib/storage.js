@@ -1,4 +1,5 @@
 const { CosmosClient } = require('@azure/cosmos')
+const { randomUUID, timingSafeEqual } = require('crypto')
 
 let cosmosClient = null
 let predictionsContainer = null
@@ -60,6 +61,7 @@ async function createPlayer(email, name, supportedTeam = null) {
   const doc = {
     id: email,
     email,
+    playerId: randomUUID(),
     name,
     supportedTeam,
     predictions: {},
@@ -139,10 +141,35 @@ async function deletePlayer(email) {
   }
 }
 
+async function getPredictionsByPlayerId(playerId) {
+  await initCosmos()
+
+  const { resources } = await predictionsContainer.items
+    .query({
+      query: 'SELECT * FROM c WHERE c.playerId = @playerId',
+      parameters: [{ name: '@playerId', value: playerId }],
+    })
+    .fetchAll()
+
+  return resources[0] || null
+}
+
+async function ensurePlayerId(doc) {
+  if (!doc || doc.playerId) return doc
+
+  const updated = {
+    ...doc,
+    playerId: randomUUID(),
+  }
+
+  await predictionsContainer.items.upsert(updated)
+  return updated
+}
+
 async function getAllPredictions() {
   await initCosmos()
   const { resources } = await predictionsContainer.items.readAll().fetchAll()
-  return resources
+  return Promise.all(resources.map((doc) => ensurePlayerId(doc)))
 }
 
 async function getResults() {
@@ -167,12 +194,19 @@ async function upsertResults(results) {
 function verifyAdminKey(request) {
   const expected = process.env.ADMIN_KEY
   if (!expected) return false
-  const provided = request.headers.get('x-admin-key')
-  return provided === expected
+
+  const provided = request.headers.get('x-admin-key') || ''
+  const expectedBuf = Buffer.from(expected)
+  const providedBuf = Buffer.from(provided)
+
+  if (expectedBuf.length !== providedBuf.length) return false
+
+  return timingSafeEqual(expectedBuf, providedBuf)
 }
 
 module.exports = {
   getPredictionsDocument,
+  getPredictionsByPlayerId,
   createPlayer,
   upsertPredictions,
   retirePlayer,

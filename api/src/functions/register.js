@@ -1,9 +1,10 @@
-const { app } = require('@azure/functions')
+const { registerHttp } = require('../lib/registerHttp')
 const { createPlayer } = require('../lib/storage')
 const { isValidSupportedTeam, normalizeSupportedTeam, resolveSupportedTeam } = require('../lib/teams')
 const { isAllowedEmail, isValidName, normalizeEmail, normalizeName } = require('../lib/validation')
+const { internalError } = require('../lib/errors')
 
-app.http('register', {
+registerHttp('register', {
   methods: ['POST'],
   authLevel: 'anonymous',
   route: 'register',
@@ -41,7 +42,7 @@ app.http('register', {
       if (err.code === 409) {
         return { status: 409, jsonBody: { error: err.message } }
       }
-      return { status: 500, jsonBody: { error: err.message } }
+      return internalError(err, 'register')
     }
   },
 })

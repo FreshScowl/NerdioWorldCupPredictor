@@ -5,6 +5,7 @@ node_modules/
 .env
 .env.*
 !.env.example
+.admin-key.local
 
 # Azure Functions local settings
 local.settings.json

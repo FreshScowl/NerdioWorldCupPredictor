@@ -2,4 +2,4 @@ using '../main.bicep'
 
 param appName = 'nerdio-worldcup-dev'
 param location = 'eastus'
-param adminKey = 'GhostBusters321123!'
+param adminKey = readEnvironmentVariable('NWCP_ADMIN_KEY')

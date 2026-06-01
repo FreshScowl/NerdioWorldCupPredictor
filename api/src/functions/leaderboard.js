@@ -1,9 +1,11 @@
-const { app } = require('@azure/functions')
+const { registerHttp } = require('../lib/registerHttp')
 const { getAllPredictions, getResults } = require('../lib/storage')
 const { calculatePlayerStats } = require('../lib/scoring')
 const { resolveSupportedTeam } = require('../lib/teams')
 
-app.http('leaderboard', {
+const { internalError } = require('../lib/errors')
+
+registerHttp('leaderboard', {
   methods: ['GET'],
   authLevel: 'anonymous',
   route: 'leaderboard',
@@ -22,7 +24,8 @@ app.http('leaderboard', {
             doc.predictions,
             results,
             doc.name,
-            resolveSupportedTeam(doc.supportedTeam)
+            resolveSupportedTeam(doc.supportedTeam),
+            doc.playerId
           )
         )
 
@@ -34,7 +37,7 @@ app.http('leaderboard', {
 
       return { jsonBody: players }
     } catch (err) {
-      return { status: 500, jsonBody: { error: err.message } }
+      return internalError(err, 'leaderboard')
     }
   },
 })
