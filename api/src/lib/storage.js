@@ -25,7 +25,7 @@ async function initCosmos() {
 
   const { container: predictions } = await database.containers.createIfNotExists({
     id: 'predictions',
-    partitionKey: { paths: ['/email'] },
+    partitionKey: { paths: ['/id'] },
   })
   const { container: results } = await database.containers.createIfNotExists({
     id: 'results',
@@ -36,11 +36,11 @@ async function initCosmos() {
   resultsContainer = results
 }
 
-async function getPredictionsDocument(email) {
+async function getPlayerDocument(playerId) {
   await initCosmos()
 
   try {
-    const { resource } = await predictionsContainer.item(email, email).read()
+    const { resource } = await predictionsContainer.item(playerId, playerId).read()
     return resource
   } catch (err) {
     if (err.code === 404) return null
@@ -48,20 +48,13 @@ async function getPredictionsDocument(email) {
   }
 }
 
-async function createPlayer(email, name, supportedTeam = null) {
+async function createPlayer(name, supportedTeam = null) {
   await initCosmos()
 
-  const existing = await getPredictionsDocument(email)
-  if (existing) {
-    const err = new Error('An account with this email already exists.')
-    err.code = 409
-    throw err
-  }
-
+  const playerId = randomUUID()
   const doc = {
-    id: email,
-    email,
-    playerId: randomUUID(),
+    id: playerId,
+    playerId,
     name,
     supportedTeam,
     predictions: {},
@@ -72,12 +65,12 @@ async function createPlayer(email, name, supportedTeam = null) {
   return doc
 }
 
-async function upsertPredictions(email, predictions) {
+async function upsertPredictions(playerId, predictions) {
   await initCosmos()
 
-  const existing = await getPredictionsDocument(email)
+  const existing = await getPlayerDocument(playerId)
   if (!existing) {
-    const err = new Error('No account found for this email. Sign up first.')
+    const err = new Error('Player not found. Sign up first.')
     err.code = 404
     throw err
   }
@@ -90,8 +83,6 @@ async function upsertPredictions(email, predictions) {
 
   const doc = {
     ...existing,
-    id: email,
-    email,
     predictions,
   }
 
@@ -99,10 +90,10 @@ async function upsertPredictions(email, predictions) {
   return doc
 }
 
-async function retirePlayer(email) {
+async function retirePlayer(playerId) {
   await initCosmos()
 
-  const existing = await getPredictionsDocument(email)
+  const existing = await getPlayerDocument(playerId)
   if (!existing) {
     const err = new Error('Account not found.')
     err.code = 404
@@ -125,12 +116,12 @@ async function retirePlayer(email) {
   return doc
 }
 
-async function deletePlayer(email) {
+async function deletePlayer(playerId) {
   await initCosmos()
 
   try {
-    await predictionsContainer.item(email, email).delete()
-    return { email, deleted: true }
+    await predictionsContainer.item(playerId, playerId).delete()
+    return { playerId, deleted: true }
   } catch (err) {
     if (err.code === 404) {
       const notFound = new Error('Account not found.')
@@ -141,35 +132,10 @@ async function deletePlayer(email) {
   }
 }
 
-async function getPredictionsByPlayerId(playerId) {
-  await initCosmos()
-
-  const { resources } = await predictionsContainer.items
-    .query({
-      query: 'SELECT * FROM c WHERE c.playerId = @playerId',
-      parameters: [{ name: '@playerId', value: playerId }],
-    })
-    .fetchAll()
-
-  return resources[0] || null
-}
-
-async function ensurePlayerId(doc) {
-  if (!doc || doc.playerId) return doc
-
-  const updated = {
-    ...doc,
-    playerId: randomUUID(),
-  }
-
-  await predictionsContainer.items.upsert(updated)
-  return updated
-}
-
 async function getAllPredictions() {
   await initCosmos()
   const { resources } = await predictionsContainer.items.readAll().fetchAll()
-  return Promise.all(resources.map((doc) => ensurePlayerId(doc)))
+  return resources
 }
 
 async function getResults() {
@@ -205,8 +171,7 @@ function verifyAdminKey(request) {
 }
 
 module.exports = {
-  getPredictionsDocument,
-  getPredictionsByPlayerId,
+  getPlayerDocument,
   createPlayer,
   upsertPredictions,
   retirePlayer,

@@ -1,16 +1,16 @@
 import { useEffect, useState } from 'react'
 import { getPredictions } from '../api'
-import { clearEmail, loadEmail, saveName, savePlayerId, saveSupportedTeam } from '../utils/email'
+import { clearPlayer, loadPlayerId, saveName, savePlayerId, saveSupportedTeam } from '../utils/player'
 import LandingPage from '../components/LandingPage'
 import PredictView from '../components/PredictView'
 
 export default function PredictPage() {
-  const [email, setEmail] = useState(null)
+  const [playerId, setPlayerId] = useState(null)
   const [checking, setChecking] = useState(true)
 
   useEffect(() => {
     async function init() {
-      const stored = loadEmail()
+      const stored = loadPlayerId()
       if (!stored) {
         setChecking(false)
         return
@@ -18,20 +18,17 @@ export default function PredictPage() {
 
       try {
         const data = await getPredictions(stored)
-        if (!data.registered) {
-          clearEmail()
-          setEmail(null)
-        } else if (data.retired) {
-          clearEmail()
-          setEmail(null)
+        if (!data.registered || data.retired) {
+          clearPlayer()
+          setPlayerId(null)
         } else {
           if (data.name) saveName(data.name)
           if (data.supportedTeam) saveSupportedTeam(data.supportedTeam)
-          if (data.playerId) savePlayerId(data.playerId)
-          setEmail(stored)
+          savePlayerId(stored)
+          setPlayerId(stored)
         }
       } catch {
-        setEmail(stored)
+        setPlayerId(stored)
       } finally {
         setChecking(false)
       }
@@ -44,9 +41,9 @@ export default function PredictPage() {
     return <div className="view-loading">Loading…</div>
   }
 
-  if (!email) {
+  if (!playerId) {
     return <LandingPage />
   }
 
-  return <PredictView email={email} />
+  return <PredictView playerId={playerId} />
 }

@@ -1,5 +1,5 @@
 const { registerHttp } = require('../lib/registerHttp')
-const { getPredictionsByPlayerId, getResults } = require('../lib/storage')
+const { getPlayerDocument, getResults } = require('../lib/storage')
 const { internalError } = require('../lib/errors')
 
 registerHttp('predictionsGetByPlayerId', {
@@ -15,7 +15,7 @@ registerHttp('predictionsGetByPlayerId', {
       }
 
       const [doc, results] = await Promise.all([
-        getPredictionsByPlayerId(playerId),
+        getPlayerDocument(playerId),
         getResults(),
       ])
 

@@ -27,7 +27,7 @@ function ScoreInput({ value, onChange, label, disabled }) {
   )
 }
 
-export default function PredictView({ email }) {
+export default function PredictView({ playerId }) {
   const [predictions, setPredictions] = useState({})
   const [results, setResults] = useState({})
   const [loading, setLoading] = useState(true)
@@ -42,7 +42,7 @@ export default function PredictView({ email }) {
     async function load() {
       try {
         const [predData, resultData] = await Promise.all([
-          getPredictions(email),
+          getPredictions(playerId),
           getResults(),
         ])
         setPredictions(predData.predictions || {})
@@ -54,7 +54,7 @@ export default function PredictView({ email }) {
       }
     }
     load()
-  }, [email])
+  }, [playerId])
 
   const stats = useMemo(() => {
     let totalPoints = 0
@@ -96,7 +96,7 @@ export default function PredictView({ email }) {
     setError('')
     setMessage('')
     try {
-      await savePredictions(email, predictions)
+      await savePredictions(playerId, predictions)
       setMessage('Predictions saved.')
     } catch (err) {
       setError(err.message)

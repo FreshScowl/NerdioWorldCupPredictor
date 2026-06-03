@@ -12,9 +12,9 @@ async function parseResponse(response) {
   return data
 }
 
-export async function getPredictions(email) {
+export async function getPredictions(playerId) {
   const response = await fetch(
-    apiUrl(`/api/predictions/${encodeURIComponent(email)}`)
+    apiUrl(`/api/predictions/${encodeURIComponent(playerId)}`)
   )
   return parseResponse(response)
 }
@@ -26,11 +26,11 @@ export async function getPredictionsByPlayerId(playerId) {
   return parseResponse(response)
 }
 
-export async function savePredictions(email, predictions) {
+export async function savePredictions(playerId, predictions) {
   const response = await fetch(apiUrl('/api/predictions'), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, predictions }),
+    body: JSON.stringify({ playerId, predictions }),
   })
   return parseResponse(response)
 }
@@ -40,11 +40,11 @@ export async function getLeaderboard() {
   return parseResponse(response)
 }
 
-export async function registerPlayer(email, name, supportedTeam = null) {
+export async function registerPlayer(name, supportedTeam = null) {
   const response = await fetch(apiUrl('/api/register'), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, name, supportedTeam }),
+    body: JSON.stringify({ name, supportedTeam }),
   })
   return parseResponse(response)
 }
@@ -84,9 +84,9 @@ export async function getAdminPlayers(adminKey) {
   return parseResponse(response)
 }
 
-export async function retireAdminPlayer(adminKey, email) {
+export async function retireAdminPlayer(adminKey, playerId) {
   const response = await fetch(
-    apiUrl(`/api/manage/players/${encodeURIComponent(email)}/retire`),
+    apiUrl(`/api/manage/players/${encodeURIComponent(playerId)}/retire`),
     {
       method: 'POST',
       headers: adminHeaders(adminKey),
@@ -95,9 +95,9 @@ export async function retireAdminPlayer(adminKey, email) {
   return parseResponse(response)
 }
 
-export async function deleteAdminPlayer(adminKey, email) {
+export async function deleteAdminPlayer(adminKey, playerId) {
   const response = await fetch(
-    apiUrl(`/api/manage/players/${encodeURIComponent(email)}`),
+    apiUrl(`/api/manage/players/${encodeURIComponent(playerId)}`),
     {
       method: 'DELETE',
       headers: adminHeaders(adminKey),

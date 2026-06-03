@@ -1,7 +1,7 @@
 const { registerHttp } = require('../lib/registerHttp')
 const { createPlayer } = require('../lib/storage')
-const { isValidSupportedTeam, normalizeSupportedTeam, resolveSupportedTeam } = require('../lib/teams')
-const { isAllowedEmail, isValidName, normalizeEmail, normalizeName } = require('../lib/validation')
+const { isValidSupportedTeam, normalizeSupportedTeam } = require('../lib/teams')
+const { isValidName, normalizeName } = require('../lib/validation')
 const { internalError } = require('../lib/errors')
 
 registerHttp('register', {
@@ -11,16 +11,8 @@ registerHttp('register', {
   handler: async (request) => {
     try {
       const body = await request.json()
-      const email = normalizeEmail(body.email)
       const name = normalizeName(body.name)
       const supportedTeam = normalizeSupportedTeam(body.supportedTeam)
-
-      if (!isAllowedEmail(email)) {
-        return {
-          status: 400,
-          jsonBody: { error: 'Email must be a valid @getnerdio.com address.' },
-        }
-      }
 
       if (!isValidName(name)) {
         return {
@@ -36,12 +28,9 @@ registerHttp('register', {
         }
       }
 
-      const doc = await createPlayer(email, name, supportedTeam)
+      const doc = await createPlayer(name, supportedTeam)
       return { status: 201, jsonBody: doc }
     } catch (err) {
-      if (err.code === 409) {
-        return { status: 409, jsonBody: { error: err.message } }
-      }
       return internalError(err, 'register')
     }
   },

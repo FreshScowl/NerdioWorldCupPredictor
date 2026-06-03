@@ -4,7 +4,7 @@ import { getLeaderboard, getPredictionsByPlayerId } from '../api'
 import { PlayerWithFlag } from '../utils/flags.jsx'
 import { TeamWithFlag } from '../utils/flags.jsx'
 import { isPredictionComplete, scorePrediction } from '../utils/scoring'
-import { loadPlayerId } from '../utils/email'
+import { loadPlayerId } from '../utils/player'
 
 function PointsBadge({ points, showScore }) {
   if (!showScore) {
@@ -107,7 +107,7 @@ function PlayerPredictionsPanel({ playerName, supportedTeam, predictions, result
   )
 }
 
-export default function LeaderboardView({ email }) {
+export default function LeaderboardView() {
   const [leaderboard, setLeaderboard] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')

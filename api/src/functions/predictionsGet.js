@@ -1,30 +1,29 @@
 const { registerHttp } = require('../lib/registerHttp')
-const { getPredictionsDocument, getResults } = require('../lib/storage')
-const { normalizeEmail } = require('../lib/validation')
+const { getPlayerDocument, getResults } = require('../lib/storage')
 const { internalError } = require('../lib/errors')
 
 registerHttp('predictionsGet', {
   methods: ['GET'],
   authLevel: 'anonymous',
-  route: 'predictions/{email}',
+  route: 'predictions/{playerId}',
   handler: async (request) => {
     try {
-      const email = normalizeEmail(decodeURIComponent(request.params.email || ''))
+      const playerId = decodeURIComponent(request.params.playerId || '').trim()
 
-      if (!email) {
-        return { status: 400, jsonBody: { error: 'Email is required' } }
+      if (!playerId) {
+        return { status: 400, jsonBody: { error: 'Player id is required' } }
       }
 
       const [doc, results] = await Promise.all([
-        getPredictionsDocument(email),
+        getPlayerDocument(playerId),
         getResults(),
       ])
 
       if (!doc) {
         return {
           jsonBody: {
-            id: email,
-            email,
+            id: playerId,
+            playerId,
             name: null,
             registered: false,
             predictions: {},

@@ -7,7 +7,7 @@ export default function AdminAccounts({ adminKey }) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
-  const [actionEmail, setActionEmail] = useState(null)
+  const [actionPlayerId, setActionPlayerId] = useState(null)
 
   async function loadPlayers() {
     setLoading(true)
@@ -32,39 +32,39 @@ export default function AdminAccounts({ adminKey }) {
     )
     if (!confirmed) return
 
-    setActionEmail(player.email)
+    setActionPlayerId(player.playerId)
     setMessage('')
     setError('')
 
     try {
-      await retireAdminPlayer(adminKey, player.email)
+      await retireAdminPlayer(adminKey, player.playerId)
       setMessage(`${player.name} has been retired.`)
       await loadPlayers()
     } catch (err) {
       setError(err.message)
     } finally {
-      setActionEmail(null)
+      setActionPlayerId(null)
     }
   }
 
   async function handleDelete(player) {
     const confirmed = window.confirm(
-      `Delete ${player.name} (${player.email})? This permanently removes their account and predictions. They can sign up again with the same email.`
+      `Delete ${player.name}? This permanently removes their account and predictions.`
     )
     if (!confirmed) return
 
-    setActionEmail(player.email)
+    setActionPlayerId(player.playerId)
     setMessage('')
     setError('')
 
     try {
-      await deleteAdminPlayer(adminKey, player.email)
+      await deleteAdminPlayer(adminKey, player.playerId)
       setMessage(`${player.name} has been deleted.`)
       await loadPlayers()
     } catch (err) {
       setError(err.message)
     } finally {
-      setActionEmail(null)
+      setActionPlayerId(null)
     }
   }
 
@@ -79,7 +79,7 @@ export default function AdminAccounts({ adminKey }) {
 
       <p className="admin-hint">
         Retire hides an account from the leaderboard and blocks predictions. Delete permanently
-        removes the account so the same email can sign up again.
+        removes the account.
       </p>
 
       {players.length === 0 ? (
@@ -90,7 +90,6 @@ export default function AdminAccounts({ adminKey }) {
             <thead>
               <tr>
                 <th>Name</th>
-                <th>Email</th>
                 <th>Status</th>
                 <th>Predicted</th>
                 <th>Actions</th>
@@ -98,12 +97,11 @@ export default function AdminAccounts({ adminKey }) {
             </thead>
             <tbody>
               {players.map((player) => {
-                const busy = actionEmail === player.email
+                const busy = actionPlayerId === player.playerId
 
                 return (
-                  <tr key={player.email} className={player.retired ? 'retired-account' : ''}>
+                  <tr key={player.playerId} className={player.retired ? 'retired-account' : ''}>
                     <td>{player.name}</td>
-                    <td className="mono-cell">{player.email}</td>
                     <td>
                       {player.retired ? (
                         <span className="status-badge retired">Retired</span>

@@ -1,17 +1,6 @@
-const ALLOWED_DOMAIN = 'getnerdio.com'
 const { FIXTURES } = require('../../fixtures')
 
 const FIXTURE_IDS = new Set(FIXTURES.map((fixture) => fixture.id))
-
-function normalizeEmail(email) {
-  return (email || '').trim().toLowerCase()
-}
-
-function isAllowedEmail(email) {
-  const normalized = normalizeEmail(email)
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalized)) return false
-  return normalized.endsWith(`@${ALLOWED_DOMAIN}`)
-}
 
 function normalizeName(name) {
   return (name || '').trim().replace(/\s+/g, ' ')
@@ -86,9 +75,6 @@ function normalizePredictions(predictions) {
 }
 
 module.exports = {
-  ALLOWED_DOMAIN,
-  normalizeEmail,
-  isAllowedEmail,
   normalizeName,
   isValidName,
   normalizeResults,

@@ -7,7 +7,6 @@ const {
 } = require('../lib/storage')
 const { isPredictionComplete } = require('../lib/scoring')
 const { resolveSupportedTeam } = require('../lib/teams')
-const { normalizeEmail } = require('../lib/validation')
 const { internalError } = require('../lib/errors')
 
 function summarizePlayer(doc) {
@@ -15,8 +14,8 @@ function summarizePlayer(doc) {
   const fixturesPredicted = Object.values(predictions).filter(isPredictionComplete).length
 
   return {
-    email: doc.email,
-    name: doc.name || doc.email.split('@')[0],
+    playerId: doc.playerId,
+    name: doc.name || 'Player',
     supportedTeam: resolveSupportedTeam(doc.supportedTeam),
     retired: !!doc.retired,
     retiredAt: doc.retiredAt || null,
@@ -49,19 +48,19 @@ registerHttp('adminPlayersList', {
 registerHttp('adminPlayerRetire', {
   methods: ['POST'],
   authLevel: 'anonymous',
-  route: 'manage/players/{email}/retire',
+  route: 'manage/players/{playerId}/retire',
   handler: async (request) => {
     if (!verifyAdminKey(request)) {
       return { status: 401, jsonBody: { error: 'Unauthorized' } }
     }
 
     try {
-      const email = normalizeEmail(decodeURIComponent(request.params.email || ''))
-      if (!email) {
-        return { status: 400, jsonBody: { error: 'Email is required' } }
+      const playerId = decodeURIComponent(request.params.playerId || '').trim()
+      if (!playerId) {
+        return { status: 400, jsonBody: { error: 'Player id is required' } }
       }
 
-      const doc = await retirePlayer(email)
+      const doc = await retirePlayer(playerId)
       return { jsonBody: summarizePlayer(doc) }
     } catch (err) {
       if (err.code === 404) return { status: 404, jsonBody: { error: err.message } }
@@ -74,19 +73,19 @@ registerHttp('adminPlayerRetire', {
 registerHttp('adminPlayerDelete', {
   methods: ['DELETE'],
   authLevel: 'anonymous',
-  route: 'manage/players/{email}',
+  route: 'manage/players/{playerId}',
   handler: async (request) => {
     if (!verifyAdminKey(request)) {
       return { status: 401, jsonBody: { error: 'Unauthorized' } }
     }
 
     try {
-      const email = normalizeEmail(decodeURIComponent(request.params.email || ''))
-      if (!email) {
-        return { status: 400, jsonBody: { error: 'Email is required' } }
+      const playerId = decodeURIComponent(request.params.playerId || '').trim()
+      if (!playerId) {
+        return { status: 400, jsonBody: { error: 'Player id is required' } }
       }
 
-      const result = await deletePlayer(email)
+      const result = await deletePlayer(playerId)
       return { jsonBody: result }
     } catch (err) {
       if (err.code === 404) return { status: 404, jsonBody: { error: err.message } }

@@ -3,27 +3,22 @@ import { useNavigate } from 'react-router-dom'
 import { registerPlayer } from '../api'
 import TeamPicker from './TeamPicker'
 import {
-  isValidEmail,
   isValidName,
-  normalizeEmail,
   normalizeName,
-  saveEmail,
   saveName,
   savePlayerId,
   saveSupportedTeam,
-} from '../utils/email'
+} from '../utils/player'
 
 export default function LandingPage() {
   const navigate = useNavigate()
   const [name, setName] = useState('')
-  const [email, setEmail] = useState('')
   const [supportedTeam, setSupportedTeam] = useState('')
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
 
   async function handleSignUp(e) {
     e.preventDefault()
-    const normalizedEmail = normalizeEmail(email)
     const normalizedName = normalizeName(name)
     const selectedTeam = supportedTeam || null
 
@@ -32,17 +27,11 @@ export default function LandingPage() {
       return
     }
 
-    if (!isValidEmail(normalizedEmail)) {
-      setError('Enter a valid @getnerdio.com email address.')
-      return
-    }
-
     setSubmitting(true)
     setError('')
 
     try {
-      const doc = await registerPlayer(normalizedEmail, normalizedName, selectedTeam)
-      saveEmail(normalizedEmail)
+      const doc = await registerPlayer(normalizedName, selectedTeam)
       saveName(normalizedName)
       saveSupportedTeam(selectedTeam)
       if (doc.playerId) savePlayerId(doc.playerId)
@@ -103,18 +92,6 @@ export default function LandingPage() {
             }}
           />
 
-          <label htmlFor="landing-email">Work email</label>
-          <input
-            id="landing-email"
-            type="email"
-            value={email}
-            onChange={(e) => {
-              setEmail(e.target.value)
-              setError('')
-            }}
-            placeholder="you@getnerdio.com"
-            autoComplete="email"
-          />
           {error && <p className="form-error">{error}</p>}
           <button type="submit" className="btn btn-primary" disabled={submitting}>
             {submitting ? 'Signing up…' : 'Sign up'}

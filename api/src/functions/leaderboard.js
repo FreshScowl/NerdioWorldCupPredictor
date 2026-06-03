@@ -20,7 +20,6 @@ registerHttp('leaderboard', {
         .filter((doc) => !doc.retired)
         .map((doc) =>
           calculatePlayerStats(
-            doc.email,
             doc.predictions,
             results,
             doc.name,

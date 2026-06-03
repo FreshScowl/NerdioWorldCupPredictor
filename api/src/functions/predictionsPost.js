@@ -1,7 +1,7 @@
 const { registerHttp } = require('../lib/registerHttp')
 const { assertPredictionsOpen } = require('../lib/deadline')
 const { upsertPredictions } = require('../lib/storage')
-const { isAllowedEmail, normalizeEmail, normalizePredictions } = require('../lib/validation')
+const { normalizePredictions } = require('../lib/validation')
 const { internalError } = require('../lib/errors')
 
 registerHttp('predictionsPost', {
@@ -13,20 +13,13 @@ registerHttp('predictionsPost', {
       assertPredictionsOpen()
 
       const body = await request.json()
-      const email = normalizeEmail(body.email)
+      const playerId = (body.playerId || '').trim()
 
-      if (!email) {
-        return { status: 400, jsonBody: { error: 'Email is required' } }
+      if (!playerId) {
+        return { status: 400, jsonBody: { error: 'Player id is required' } }
       }
 
-      if (!isAllowedEmail(email)) {
-        return {
-          status: 400,
-          jsonBody: { error: 'Email must be a valid @getnerdio.com address.' },
-        }
-      }
-
-      const doc = await upsertPredictions(email, normalizePredictions(body.predictions))
+      const doc = await upsertPredictions(playerId, normalizePredictions(body.predictions))
       return { jsonBody: doc }
     } catch (err) {
       if (err.code === 404) {

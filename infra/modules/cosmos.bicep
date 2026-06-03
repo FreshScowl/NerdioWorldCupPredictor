@@ -45,7 +45,7 @@ resource predictionsContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabase
       id: 'predictions'
       partitionKey: {
         paths: [
-          '/email'
+          '/id'
         ]
         kind: 'Hash'
       }
