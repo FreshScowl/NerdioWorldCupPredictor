@@ -3,6 +3,7 @@ import { FIXTURES, fixturesByGroup, GROUPS, TOTAL_FIXTURES } from '../fixtures'
 import { getPredictions, getResults, savePredictions } from '../api'
 import { arePredictionsOpen, predictionsClosedMessage } from '../utils/deadline'
 import { isPredictionComplete, scorePrediction } from '../utils/scoring'
+import { teamFlag } from '../utils/flags'
 
 function ScoreInput({ value, onChange, label, disabled }) {
   return (
@@ -140,8 +141,9 @@ export default function PredictView({ playerId }) {
 
               return (
                 <li key={fixture.id} className="fixture-row">
-                  <span className="fixture-teams">
-                    {fixture.home} vs {fixture.away}
+                  <span className="fixture-team fixture-team-home">
+                    <span className="fixture-team-name">{fixture.home}</span>
+                    <span className="team-flag" aria-hidden="true">{teamFlag(fixture.home)}</span>
                   </span>
                   <div className="fixture-inputs">
                     <ScoreInput
@@ -158,6 +160,10 @@ export default function PredictView({ playerId }) {
                       disabled={!predictionsOpen}
                     />
                   </div>
+                  <span className="fixture-team fixture-team-away">
+                    <span className="team-flag" aria-hidden="true">{teamFlag(fixture.away)}</span>
+                    <span className="fixture-team-name">{fixture.away}</span>
+                  </span>
                 </li>
               )
             })}
