@@ -1,9 +1,10 @@
 import { Fragment, useEffect, useState } from 'react'
-import { FIXTURES, TOTAL_FIXTURES } from '../fixtures'
+import { fixturesChronological, formatFixtureDate, TOTAL_FIXTURES } from '../fixtures'
 import { getLeaderboard, getPredictionsByPlayerId } from '../api'
 import { PlayerWithFlag } from '../utils/flags.jsx'
 import { TeamWithFlag } from '../utils/flags.jsx'
 import { isPredictionComplete, scorePrediction } from '../utils/scoring'
+import { predictionsDeadlineLabel } from '../utils/deadline'
 import { loadPlayerId } from '../utils/player'
 
 function PointsBadge({ points, showScore }) {
@@ -59,6 +60,7 @@ function PlayerPredictionsPanel({ playerName, supportedTeam, predictions, result
         <table className="leaderboard-predictions-table">
           <thead>
             <tr>
+              <th>Date</th>
               <th>Group</th>
               <th>Home</th>
               <th>Predicted</th>
@@ -68,7 +70,7 @@ function PlayerPredictionsPanel({ playerName, supportedTeam, predictions, result
             </tr>
           </thead>
           <tbody>
-            {FIXTURES.map((fixture) => {
+            {fixturesChronological().map((fixture) => {
               const prediction = predictions?.[fixture.id]
               const actual = results?.[fixture.id]
               const hasResult =
@@ -79,6 +81,7 @@ function PlayerPredictionsPanel({ playerName, supportedTeam, predictions, result
 
               return (
                 <tr key={fixture.id}>
+                  <td className="fixture-date-cell">{formatFixtureDate(fixture.date)}</td>
                   <td>
                     <span className="group-tag">Grp {fixture.group}</span>
                   </td>
@@ -172,6 +175,7 @@ export default function LeaderboardView() {
   return (
     <div className="leaderboard-view card">
       <h2>Leaderboard</h2>
+      <p className="deadline-note">{predictionsDeadlineLabel()}</p>
       <p className="leaderboard-hint">Click a player to view their predictions</p>
       {leaderboard.length === 0 ? (
         <p className="empty-state">No predictions yet. Be the first to play!</p>

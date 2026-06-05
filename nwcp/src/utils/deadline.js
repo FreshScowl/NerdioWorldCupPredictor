@@ -8,3 +8,8 @@ export function arePredictionsOpen(now = new Date()) {
 export function predictionsClosedMessage() {
   return 'Predictions closed on 11 June 2026. Entries were accepted until 10 June.'
 }
+
+/** Short label for the submission deadline, shown as a header on the predict/leaderboard pages. */
+export function predictionsDeadlineLabel() {
+  return 'Predictions lock 11 June 2026 (first kick-off)'
+}

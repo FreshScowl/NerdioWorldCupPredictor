@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
-import { FIXTURES, fixturesByGroup, GROUPS, TOTAL_FIXTURES } from '../fixtures'
+import { FIXTURES, fixturesByGroup, formatFixtureDate, GROUPS, TOTAL_FIXTURES } from '../fixtures'
 import { getPredictions, getResults, savePredictions } from '../api'
-import { arePredictionsOpen, predictionsClosedMessage } from '../utils/deadline'
+import { arePredictionsOpen, predictionsClosedMessage, predictionsDeadlineLabel } from '../utils/deadline'
 import { isPredictionComplete, scorePrediction } from '../utils/scoring'
 import { teamFlag } from '../utils/flags'
 
@@ -116,6 +116,8 @@ export default function PredictView({ playerId }) {
         <p className="banner banner-error predictions-closed-banner">{predictionsClosedMessage()}</p>
       )}
 
+      <p className="deadline-note">{predictionsDeadlineLabel()}</p>
+
       <div className="stats-bar card">
         <div className="stat">
           <span className="stat-label">Total points</span>
@@ -145,20 +147,23 @@ export default function PredictView({ playerId }) {
                     <span className="fixture-team-name">{fixture.home}</span>
                     <span className="team-flag" aria-hidden="true">{teamFlag(fixture.home)}</span>
                   </span>
-                  <div className="fixture-inputs">
-                    <ScoreInput
-                      value={prediction.home}
-                      onChange={(v) => updatePrediction(fixture.id, 'home', v)}
-                      label={`${fixture.home} score`}
-                      disabled={!predictionsOpen}
-                    />
-                    <span className="fixture-separator">–</span>
-                    <ScoreInput
-                      value={prediction.away}
-                      onChange={(v) => updatePrediction(fixture.id, 'away', v)}
-                      label={`${fixture.away} score`}
-                      disabled={!predictionsOpen}
-                    />
+                  <div className="fixture-center">
+                    <span className="fixture-date">{formatFixtureDate(fixture.date)}</span>
+                    <div className="fixture-inputs">
+                      <ScoreInput
+                        value={prediction.home}
+                        onChange={(v) => updatePrediction(fixture.id, 'home', v)}
+                        label={`${fixture.home} score`}
+                        disabled={!predictionsOpen}
+                      />
+                      <span className="fixture-separator">–</span>
+                      <ScoreInput
+                        value={prediction.away}
+                        onChange={(v) => updatePrediction(fixture.id, 'away', v)}
+                        label={`${fixture.away} score`}
+                        disabled={!predictionsOpen}
+                      />
+                    </div>
                   </div>
                   <span className="fixture-team fixture-team-away">
                     <span className="team-flag" aria-hidden="true">{teamFlag(fixture.away)}</span>
