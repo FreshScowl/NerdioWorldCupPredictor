@@ -28,7 +28,9 @@ h3 {
 }
 
 button,
-input {
+input,
+select,
+option {
   font-family: inherit;
 }
 
