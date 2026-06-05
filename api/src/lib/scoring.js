@@ -6,11 +6,18 @@ function getOutcome(home, away) {
   return 'draw'
 }
 
+function hasScore(value) {
+  return value && value.home !== '' && value.away !== '' && value.home != null && value.away != null
+}
+
 function scorePrediction(predicted, actual) {
-  if (!actual || actual.home == null || actual.away == null) return null
+  if (!hasScore(actual)) return null
+
+  const aHome = Number(actual.home)
+  const aAway = Number(actual.away)
+  if (Number.isNaN(aHome) || Number.isNaN(aAway)) return null
 
   const { home: pHome, away: pAway } = predicted
-  const { home: aHome, away: aAway } = actual
 
   if (pHome === aHome && pAway === aAway) return 3
   if (getOutcome(pHome, pAway) === getOutcome(aHome, aAway)) return 1
@@ -42,7 +49,7 @@ function calculatePlayerStats(predictions, results, name, supportedTeam, playerI
     const actual = results?.[fixture.id]
     const points = scorePrediction(
       { home: Number(prediction.home), away: Number(prediction.away) },
-      actual ? { home: Number(actual.home), away: Number(actual.away) } : null
+      actual || null
     )
 
     if (points === null) continue

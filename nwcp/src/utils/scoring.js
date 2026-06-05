@@ -1,10 +1,22 @@
+export function hasScore(value) {
+  return (
+    value &&
+    value.home !== '' &&
+    value.away !== '' &&
+    value.home != null &&
+    value.away != null
+  )
+}
+
 export function scorePrediction(predicted, actual) {
-  if (!actual || actual.home == null || actual.away == null) return null
+  if (!hasScore(actual)) return null
 
   const pHome = Number(predicted.home)
   const pAway = Number(predicted.away)
   const aHome = Number(actual.home)
   const aAway = Number(actual.away)
+
+  if (Number.isNaN(aHome) || Number.isNaN(aAway)) return null
 
   if (pHome === aHome && pAway === aAway) return 3
 
